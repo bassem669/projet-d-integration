@@ -1,4 +1,4 @@
-// register.js
+// register.js ce code est modifier  
 const express = require("express");
 const bcrypt = require("bcrypt");
 const bodyParser = require("body-parser");
@@ -10,19 +10,16 @@ router.use(bodyParser.json());
 // Route d'inscription
 router.post("/register", async (req, res) => {
   const { 
-    nom, 
-    prenom, 
+    username, 
     email, 
-    motDePasse, 
-    role,
-    niveau,
-    specialite 
+    password, 
+    role
   } = req.body;
 
   // Validation des champs obligatoires
-  if (!nom || !prenom || !email || !motDePasse || !role) {
+  if (!username || !email || !password || !role) {
     return res.status(400).json({ 
-      message: "Nom, prénom, email, mot de passe et rôle sont obligatoires" 
+      message: "Username, email, password et rôle sont obligatoires" 
     });
   }
 
@@ -43,93 +40,80 @@ router.post("/register", async (req, res) => {
   }
 
   // Validation de la force du mot de passe
-  if (motDePasse.length < 6) {
+  if (password.length < 6) {
     return res.status(400).json({ 
       message: "Le mot de passe doit contenir au moins 6 caractères" 
+    });
+  }
+
+  // Validation du username
+  if (username.length < 3) {
+    return res.status(400).json({ 
+      message: "Le username doit contenir au moins 3 caractères" 
     });
   }
 
   try {
     // Vérifier si l'email existe déjà
     const checkEmailSql = "SELECT idUtilisateur FROM Utilisateur WHERE email = ?";
-    connection.query(checkEmailSql, [email], async (err, results) => {
+    connection.query(checkEmailSql, [email], async (err, emailResults) => {
       if (err) {
         console.error("Erreur MySQL :", err);
         return res.status(500).json({ message: "Erreur serveur" });
       }
 
-      if (results.length > 0) {
+      if (emailResults.length > 0) {
         return res.status(409).json({ 
           message: "Cet email est déjà utilisé" 
         });
       }
 
-      // Hachage du mot de passe
-      const saltRounds = 10;
-      const motDePasseHache = await bcrypt.hash(motDePasse, saltRounds);
-
-      // Déterminer les valeurs par défaut selon le rôle
-      let valeursNiveau = niveau || null;
-      let valeursSpecialite = specialite || null;
-      let progressionParDefaut = "0%";
-      let notesParDefaut = null;
-
-      // Logique métier selon le rôle
-      if (role === "etudiant") {
-        progressionParDefaut = "0%";
-        notesParDefaut = 0.0;
-        // Pour un étudiant, le niveau est obligatoire
-        if (!niveau) {
-          return res.status(400).json({ 
-            message: "Le niveau est obligatoire pour un étudiant" 
-          });
-        }
-      } else if (role === "enseignant") {
-        progressionParDefaut = null;
-        notesParDefaut = null;
-        // Pour un enseignant, la spécialité est importante
-        if (!specialite) {
-          return res.status(400).json({ 
-            message: "La spécialité est obligatoire pour un enseignant" 
-          });
-        }
-      }
-
-      // Insertion dans la base de données
-      const insertSql = `
-        INSERT INTO Utilisateur 
-        (nom, prenom, email, motDePasse, role, niveau, progression, notes, specialite) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `;
-
-      connection.query(insertSql, [
-        nom,
-        prenom,
-        email,
-        motDePasseHache,
-        role,
-        valeursNiveau,
-        progressionParDefaut,
-        notesParDefaut,
-        valeursSpecialite
-      ], (err, results) => {
+      // Vérifier si le username existe déjà
+      const checkUsernameSql = "SELECT idUtilisateur FROM Utilisateur WHERE username = ?";
+      connection.query(checkUsernameSql, [username], async (err, usernameResults) => {
         if (err) {
-          console.error("Erreur lors de l'inscription :", err);
-          return res.status(500).json({ message: "Erreur lors de l'inscription" });
+          console.error("Erreur MySQL :", err);
+          return res.status(500).json({ message: "Erreur serveur" });
         }
 
-        // Succès
-        res.status(201).json({
-          message: "Inscription réussie",
-          user: {
-            idUtilisateur: results.insertId,
-            nom,
-            prenom,
-            email,
-            role,
-            niveau: valeursNiveau,
-            specialite: valeursSpecialite
+        if (usernameResults.length > 0) {
+          return res.status(409).json({ 
+            message: "Ce username est déjà utilisé" 
+          });
+        }
+
+        // Hachage du mot de passe
+        const saltRounds = 10;
+        const passwordHache = await bcrypt.hash(password, saltRounds);
+
+        // Insertion dans la base de données
+        const insertSql = `
+          INSERT INTO Utilisateur 
+          (username, email, password, role) 
+          VALUES (?, ?, ?, ?)
+        `;
+
+        connection.query(insertSql, [
+          username,
+          email,
+          passwordHache,
+          role
+        ], (err, results) => {
+          if (err) {
+            console.error("Erreur lors de l'inscription :", err);
+            return res.status(500).json({ message: "Erreur lors de l'inscription" });
           }
+
+          // Succès
+          res.status(201).json({
+            message: "Inscription réussie",
+            user: {
+              idUtilisateur: results.insertId,
+              username,
+              email,
+              role
+            }
+          });
         });
       });
     });
@@ -140,5 +124,4 @@ router.post("/register", async (req, res) => {
   }
 });
 
-
-module.exports = router ;
+module.exports = router;
