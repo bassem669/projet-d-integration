@@ -2,12 +2,13 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const app = express();
+const registerRouter = require('./src/db/register'); // chemin vers ton register.js
 
 // Middlewares
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
+app.use('/', registerRouter);
 // Test route
 app.get('/', (req, res) => {
   res.json({ message: 'Plateforme éducative backend opérationnelle !' });
