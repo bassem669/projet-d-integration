@@ -1,5 +1,5 @@
 /* register.css */
-@import './login.css'; /* Optionnel si tu veux tout hériter et juste surcharger des styles */
+@import "../login/login.css"; /* Optionnel si tu veux tout hériter et juste surcharger des styles */
 .toggle-switch {
   display: flex;
   align-items: center;

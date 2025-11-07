@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import logo from '../images/logo.png';
+import logo from '../../assets/logo_edu.png';
 import './theme_etudiant.css';
 
 const DashboardEtudiant = () => {
@@ -54,13 +54,16 @@ const DashboardEtudiant = () => {
       {/* Top Navigation Bar */}
       <nav className="top-nav">
         <div className="logo">
-  <img src={logo} alt="EduLearn" className="logo-image" />
-</div>
+          <Link to="/">
+            <img src={logo} alt="EduLearn" className="logo-image" />
+          </Link>
+        </div>
+
         <ul className="nav-menu">
           <li><Link to="/cours" className={location.pathname === '/cours' ? 'nav-active' : ''}>Cours</Link></li>
           <li><Link to="/quiz" className={location.pathname === '/quiz' ? 'nav-active' : ''}>Quiz</Link></li>
           <li><Link to="/progression" className={location.pathname === '/progression' ? 'nav-active' : ''}>Progression</Link></li>
-          <li><a href="#contact">Contact</a></li>
+          <li><a href="/contact">Contact</a></li>
         </ul>
         <div className="user-profile">
           <Link to="/profil" className="profile-link">
