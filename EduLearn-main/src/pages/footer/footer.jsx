@@ -1,8 +1,8 @@
 import React from "react";
 import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn } from "react-icons/fa";
-import '../pages/footer.css';
 import { Link } from "react-router-dom";
-import logo from "../assets/logo_edu.png";
+import './footer.css';
+import logo from '../../assets/logo_edu.png';
 
 function Footer() {
   return (

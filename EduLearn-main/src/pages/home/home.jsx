@@ -1,24 +1,28 @@
-import React from "react";
+import React, { useState } from "react";
 import Slider from "react-slick";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import Modal from "react-modal";
 import { FaSignInAlt, FaUserPlus } from "react-icons/fa";
-import logo from "../assets/logo_edu.png";
-import banner1 from "../assets/banner1.png";
-import banner2 from "../assets/banner2.png";
-import banner3 from "../assets/banner3.png";
-import course1 from "../assets/math.png";
-import course2 from "../assets/eng.png";
-import course3 from "../assets/info.png";
-import course4 from "../assets/arabe.png";
-import course5 from "../assets/mec.png";
-import course6 from "../assets/sci.png";
-import teacher1 from "../assets/teacher1.jpg";
-import teacher2 from "../assets/teacher2.jpg";
-import teacher3 from "../assets/teacher3.jpg";
-import teacher4 from "../assets/teacher4.jpg";
-import teacher5 from "../assets/teacher5.jpg";
+import logo from "../../assets/logo_edu.png";
+import banner1 from "../../assets/banner1.png";
+import banner2 from "../../assets/banner2.png";
+import banner3 from "../../assets/banner3.png";
+import course1 from "../../assets/math.png";
+import course2 from "../../assets/eng.png";
+import course3 from "../../assets/info.png";
+import course4 from "../../assets/arabe.png";
+import course5 from "../../assets/mec.png";
+import course6 from "../../assets/sci.png";
+import teacher1 from "../../assets/teacher1.jpg";
+import teacher2 from "../../assets/teacher2.jpg";
+import teacher3 from "../../assets/teacher3.jpg";
+import teacher4 from "../../assets/teacher4.jpg";
+import teacher5 from "../../assets/teacher5.jpg";
 
 function Home() {
+  const navigate = useNavigate();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const banners = [banner3, banner2, banner1];
 
   const courses = [
@@ -72,56 +76,64 @@ function Home() {
     ],
   };
 
+  // Fonction appelée quand un visiteur clique sur un cours
+  const handleCourseClick = () => {
+    setIsModalOpen(true);
+  };
+
   return (
     <div className="home-page">
+      {/* Navigation */}
       <nav className="home-nav">
         <div className="nav-left">
-            <Link to="/">
-                <img src={logo} alt="Logo" className="home-logo" />
-            </Link>
+          <Link to="/">
+            <img src={logo} alt="Logo" className="home-logo" />
+          </Link>
         </div>
         <div className="nav-right">
-            <div className="nav-links-main">
-                <Link to="#courses">Cours</Link>
-                <Link to="#teachers">Professeurs</Link>
-                <Link to="#contact">Contact</Link>
+          <div className="nav-links-main">
+            <Link to="#courses">Cours</Link>
+            <Link to="#teachers">Professeurs</Link>
+            <Link to="/contact">Contact</Link>
+          </div>
+          <div className="nav-dropdown">
+            <button className="dropbtn">Compte ▼</button>
+            <div className="dropdown-content">
+              <Link to="/login">
+                <FaSignInAlt style={{ marginRight: "8px" }} /> Connexion
+              </Link>
+              <Link to="/register">
+                <FaUserPlus style={{ marginRight: "8px" }} /> Inscription
+              </Link>
             </div>
-            <div className="nav-dropdown">
-        <button className="dropbtn">Compte ▼</button>
-        <div className="dropdown-content">
-            <Link to="/login">
-            <FaSignInAlt style={{ marginRight: "8px" }} /> Connexion
-            </Link>
-            <Link to="/register">
-            <FaUserPlus style={{ marginRight: "8px" }} /> Inscription
-            </Link>
+          </div>
         </div>
-        </div>
-        </div>
-        </nav>
+      </nav>
 
       {/* Hero Section */}
-        <section className="hero-section">
+      <section className="hero-section">
         <div className="hero-slider">
-            <Slider {...sliderSettingsHero}>
+          <Slider {...sliderSettingsHero}>
             {banners.map((img, index) => (
-                <div key={index} className="hero-slide">
+              <div key={index} className="hero-slide">
                 <img src={img} alt={`Slide ${index + 1}`} />
                 <div className="hero-overlay">
-                    <Link to="/register" className="cta-button">Rejoignez-nous!</Link>
+                  <Link to="/register" className="cta-button">
+                    Rejoignez-nous!
+                  </Link>
                 </div>
-                </div>
+              </div>
             ))}
-            </Slider>
+          </Slider>
         </div>
-        </section>
+      </section>
 
       {/* Section Cours */}
-      <section className="courses-section">
+      <section className="courses-section" id="courses">
         <h2>Nos Cours</h2>
         <Slider {...sliderSettingsCourses}>
           {courses.map((course, index) => (
-            <div className="course-card" key={index}>
+            <div className="course-card" key={index} onClick={handleCourseClick}>
               <img src={course.img} alt={course.name} />
               <h3>{course.name}</h3>
               <p>{course.desc}</p>
@@ -131,7 +143,7 @@ function Home() {
       </section>
 
       {/* Section Professeurs */}
-      <section className="teachers-section">
+      <section className="teachers-section" id="teachers">
         <h2>Nos Professeurs</h2>
         <Slider {...sliderSettingsTeachers}>
           {teachers.map((teacher, index) => (
@@ -143,6 +155,26 @@ function Home() {
           ))}
         </Slider>
       </section>
+
+      {/* Popup inscription */}
+      <Modal
+        isOpen={isModalOpen}
+        onRequestClose={() => setIsModalOpen(false)}
+        className="custom-modal"
+        overlayClassName="custom-overlay"
+        ariaHideApp={false}
+      >
+        <h2>Inscription requise</h2>
+        <p>Pour participer à nos cours, vous devez vous inscrire d’abord.</p>
+        <div className="modal-buttons">
+          <button onClick={() => navigate("/register")} className="btn-primary">
+            S'inscrire
+          </button>
+          <button onClick={() => setIsModalOpen(false)} className="btn-secondary">
+            Annuler
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }

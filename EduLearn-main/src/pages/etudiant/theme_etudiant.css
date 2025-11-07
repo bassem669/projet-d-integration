@@ -1669,7 +1669,7 @@
 }
 
 .dashboard-etudiant .logo-image {
-  height: 50px; /* Taille parfaite pour 70px de navbar */
+  height: 100px; /* Taille parfaite pour 70px de navbar */
   width: auto;
   object-fit: contain;
 }

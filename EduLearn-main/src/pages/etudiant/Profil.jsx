@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import logo from '../images/logo.png';
+import logo from '../../images/logo.png';
 import './theme_etudiant.css';
 
 const Profil = () => {

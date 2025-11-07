@@ -1,13 +1,13 @@
 import React, { useState } from "react";
-import logo from "../assets/logo_edu.png";
-import illustration from "../assets/grad.jpg";
+import logo from "../../assets/logo_edu1.png";
+import illustration from "../../assets/grad.jpg";
 import { Link } from "react-router-dom";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import Tooltip from "@mui/material/Tooltip";
-import '../pages/register.css';
+import './register.css';
 
 
 const Alert = React.forwardRef(function Alert(props, ref) {
@@ -78,58 +78,15 @@ function Register() {
 
     if (hasError) return; // stoppe si erreurs
 
-    registreFun();
-
-    // ***************************************************** API
-    // console.log("Register with:", { username, email, password, role });
-    // handleToast("Inscription réussie !", "success");
+    console.log("Register with:", { username, email, password, role });
+    handleToast("Inscription réussie !", "success");
 
     // reset
-    // setUsername("");
-    // setEmail("");
-    // setPassword("");
-    // setConfirmPassword("");
-    // setRole("etudiant");
-  };
-
-  const registreFun = async () => {
-      try {
-        const response = await fetch("http://localhost:3005/register", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username : username, email : email, password : password, role : role }),
-          credentials: "include",
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          handleToast(data.message || "Erreur lors de l'inscription", "error");
-          return;
-        }
-
-        handleToast(data.message || "Inscription réussie !", "success");
-
-        // Stocker l'utilisateur localement si besoin
-        if (data.user) {
-          localStorage.setItem("user", JSON.stringify(data.user));
-        }
-
-        // Redirection selon le backend
-        if (data.redirectUrl) {
-          window.location.href = data.redirectUrl;
-        }
-
-        // Reset des champs
-        setUsername("");
-        setEmail("");
-        setPassword("");
-        setRole("");
-
-    } catch (error) {
-      console.error("Erreur lors de l'inscription :", error);
-      handleToast("Erreur de serveur", "error");
-    }
+    setUsername("");
+    setEmail("");
+    setPassword("");
+    setConfirmPassword("");
+    setRole("etudiant");
   };
 
   return (
