@@ -22,6 +22,10 @@ import MesCours from "./pages/etudiant/MesCours";
 import Quiz from "./pages/etudiant/Quiz";
 import Progression from "./pages/etudiant/Progression";
 import Profil from "./pages/etudiant/Profil";
+import DetailCours from "./pages/etudiant/DetailCours";
+
+
+
 
 // 🌸 Styles - ORDRE CRUCIAL !
 import "./pages/etudiant/theme_etudiant.css";
@@ -63,6 +67,7 @@ function AppContent() {
         <Route path="/quiz" element={<Quiz />} />
         <Route path="/progression" element={<Progression />} />
         <Route path="/profil" element={<Profil />} />
+        <Route path="/cours/:id" element={<DetailCours />} />
       </Routes>
 
       {/* 🌸 Footer visible uniquement sur les pages publiques */}
