@@ -458,7 +458,10 @@ export default function TeacherDashboard() {
                       <td>
                         <button
                           className="btn btn-primary btn-sm me-2"
-                          onClick={() => showNotification("info", `Modification du cours "${c.title}" - Fonctionnalité à implémenter`)}
+                          onClick={() => {
+                            setNewCourse(c);
+                            setActiveTab("modifierCours");
+                          }}
                           title="Modifier"
                         >
                           <FaEdit />
@@ -553,7 +556,7 @@ export default function TeacherDashboard() {
             </div>
 
             <div className="form-group mb-3">
-              <label>Fichier</label>
+              <label>Fichier du cours</label>
               <input
                 type="file"
                 className="form-control"
@@ -576,6 +579,87 @@ export default function TeacherDashboard() {
 
               <button type="submit" className="btn btn-primary">
                 Créer le cours
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* MODIFIER COURS */}
+      {activeTab === "modifierCours" && (
+        <div className="card-modern p-4 mt-4">
+          <h4>Modifier le cours</h4>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const updatedList = courses.map((c) =>
+                c.id === newCourse.id ? newCourse : c
+              );
+              setCourses(updatedList);
+              setActiveTab("mesCours");
+              showNotification("success", "Cours modifié avec succès !");
+            }}
+          >
+            <div className="form-group mb-3">
+              <label>Titre *</label>
+              <input
+                type="text"
+                className="form-control"
+                value={newCourse.title}
+                onChange={(e) => setNewCourse({ ...newCourse, title: e.target.value })}
+                required
+              />
+            </div>
+
+            <div className="form-group mb-3">
+              <label>Date *</label>
+              <input
+                type="date"
+                className="form-control"
+                value={newCourse.date}
+                onChange={(e) => setNewCourse({ ...newCourse, date: e.target.value })}
+                required
+              />
+            </div>
+
+            <div className="form-group mb-3">
+              <label>Niveau *</label>
+              <select
+                className="form-control"
+                value={newCourse.level}
+                onChange={(e) => setNewCourse({ ...newCourse, level: e.target.value })}
+                required
+              >
+                <option value="première">Première</option>
+                <option value="deuxième">Deuxième</option>
+                <option value="troisième">Troisième</option>
+              </select>
+            </div>
+
+            <div className="form-group mb-3">
+              <label>Type de fichier *</label>
+              <select
+                className="form-control"
+                value={newCourse.type}
+                onChange={(e) => setNewCourse({ ...newCourse, type: e.target.value })}
+              >
+                <option value="PDF">PDF</option>
+                <option value="PowerPoint">PowerPoint</option>
+                <option value="Video">Vidéo</option>
+              </select>
+            </div>
+
+            <div className="form-group d-flex justify-content-between">
+              <button
+                type="button"
+                className="btn"
+                style={{ backgroundColor: "#ff8800", color: "#fff" }}
+                onClick={() => setActiveTab("mesCours")}
+              >
+                ← Annuler
+              </button>
+              <button type="submit" className="btn btn-primary">
+                Enregistrer les modifications
               </button>
             </div>
           </form>
