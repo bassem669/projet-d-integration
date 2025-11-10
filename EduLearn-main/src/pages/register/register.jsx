@@ -15,7 +15,8 @@ const Alert = React.forwardRef(function Alert(props, ref) {
 });
 
 function Register() {
-  const [username, setUsername] = useState("");
+  const [nom, setNom] = useState("");
+  const [prenom, setPrenom] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -41,7 +42,8 @@ function Register() {
 
   // Erreurs inline
   const [errors, setErrors] = useState({
-    username: "",
+    nom: "",
+    prenom: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -50,11 +52,16 @@ function Register() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const newErrors = { username: "", email: "", password: "", confirmPassword: "" };
+    const newErrors = { nom: "", prenom: "", email: "", password: "", confirmPassword: "" };
     let hasError = false;
 
-    if (username.trim().length < 3) {
-      newErrors.username = "Au moins 3 lettres";
+    if (nom.trim().length < 3) {
+      newErrors.username = "Le nom doit contenir au moins 3 lettres";
+      hasError = true;
+    }
+
+    if (prenom.trim().length < 2) {
+      newErrors.prenom = "Le prénom doit contenir au moins 2 lettres";
       hasError = true;
     }
 
@@ -78,11 +85,12 @@ function Register() {
 
     if (hasError) return; // stoppe si erreurs
 
-    console.log("Register with:", { username, email, password, role });
+    console.log("Register with:", { nom, prenom, email, password, role });
     handleToast("Inscription réussie !", "success");
 
     // reset
-    setUsername("");
+    setNom("");
+    setPrenom("");
     setEmail("");
     setPassword("");
     setConfirmPassword("");
@@ -103,8 +111,18 @@ function Register() {
               <input
                 type="text"
                 placeholder="Nom d'utilisateur"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                value={nom}
+                onChange={(e) => setNom(e.target.value)}
+                required
+              />
+            </Tooltip>
+
+            <Tooltip title={errors.prenom} open={!!errors.prenom} placement="right" arrow>
+              <input
+                type="text"
+                placeholder="Prénom"
+                value={prenom}
+                onChange={(e) => setPrenom(e.target.value)}
                 required
               />
             </Tooltip>
