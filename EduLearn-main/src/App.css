@@ -99,7 +99,20 @@ body {
   background-color: var(--secondary-color);
   color: #fff;
 }
+.logout-btn {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+}
 
+.logout-btn:hover {
+  background-color: var(--secondary-color);
+}
 .nav-dropdown:hover .dropdown-content {
   display: block;
 }
@@ -262,4 +275,67 @@ body {
   .nav-links-auth {
     margin-left: 0;
   }
+}
+.custom-overlay {
+  background-color: rgba(0, 0, 0, 0.6);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.custom-modal {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 10px;
+  width: 400px;
+  text-align: center;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+}
+
+.custom-modal h2 {
+  color: #2a4d7b;
+  margin-bottom: 1rem;
+}
+
+.custom-modal p {
+  margin-bottom: 1.5rem;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.btn-primary {
+  background-color: #2a4d7b;
+  color: white;
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn-primary:hover {
+  background-color: #ff8c42;
+}
+
+.btn-secondary {
+  background-color: #ccc;
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn-secondary:hover {
+  background-color: #aaa;
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import logo from '../images/logo.png';
+import Navbar from "../Navbar";
 import './theme_etudiant.css';
 
 const Progression = () => {
@@ -34,26 +34,11 @@ const Progression = () => {
   ];
 
   return (
+    <>
+    <Navbar />  {/* ✅ Navbar affichée en haut */}
     <div className="dashboard-layout dashboard-etudiant">
     <div className="app-container">
-      {/* Top Navigation Bar */}
-      <nav className="top-nav">
-        <div className="logo">
-  <img src={logo} alt="EduLearn" className="logo-image" />
-</div>
-        <ul className="nav-menu">
-          <li><Link to="/cours">Cours</Link></li>
-          <li><Link to="/quiz">Quiz</Link></li>
-          <li><Link to="/progression" className={location.pathname === '/progression' ? 'nav-active' : ''}>Progression</Link></li>
-          <li><a href="#contact">Contact</a></li>
-        </ul>
-        <div className="user-profile">
-          <Link to="/profil" className="profile-link">
-            <div className="profile-pic">NP</div>
-            <span>Nom Prénom</span>
-          </Link>
-        </div>
-      </nav>
+      
 
       <div className="main-layout">
         {/* Sidebar */}
@@ -273,6 +258,7 @@ const Progression = () => {
       </div>
     </div>
     </div>
+    </>
   );
 };
 

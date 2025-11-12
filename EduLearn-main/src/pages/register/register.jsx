@@ -1,13 +1,15 @@
 import React, { useState } from "react";
-import logo from "../assets/logo_edu.png";
-import illustration from "../assets/grad.jpg";
+import logo from "../../assets/logo_edu1.png";
+import illustration from "../../assets/grad.jpg";
 import { Link } from "react-router-dom";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import Tooltip from "@mui/material/Tooltip";
-import '../pages/register.css';
+import './register.css';
+import { useNavigate } from 'react-router-dom';
+
 
 
 const Alert = React.forwardRef(function Alert(props, ref) {
@@ -15,7 +17,9 @@ const Alert = React.forwardRef(function Alert(props, ref) {
 });
 
 function Register() {
-  const [username, setUsername] = useState("");
+  const navigate = useNavigate();
+  const [nom, setNom] = useState("");
+  const [prenom, setPrenom] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -41,20 +45,26 @@ function Register() {
 
   // Erreurs inline
   const [errors, setErrors] = useState({
-    username: "",
+    nom: "",
+    prenom: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const newErrors = { username: "", email: "", password: "", confirmPassword: "" };
+    const newErrors = { nom: "", prenom: "", email: "", password: "", confirmPassword: "" };
     let hasError = false;
 
-    if (username.trim().length < 3) {
-      newErrors.username = "Au moins 3 lettres";
+    if (nom.trim().length < 3) {
+      newErrors.nom = "Le nom doit contenir au moins 3 lettres";
+      hasError = true;
+    }
+
+    if (prenom.trim().length < 2) {
+      newErrors.prenom = "Le prénom doit contenir au moins 2 lettres";
       hasError = true;
     }
 
@@ -75,62 +85,47 @@ function Register() {
     }
 
     setErrors(newErrors);
+    if (hasError) return;
 
-    if (hasError) return; // stoppe si erreurs
+    // ✅ Envoi au backend avec fetch
+    try {
+      const registreData = {
+        nom : nom, 
+        prenom : prenom,
+        email : email, 
+        motDePasse : password, 
+        role : role
+      }
+      const response = await fetch("http://localhost:5000/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(registreData),
+      });
 
-    registreFun();
+      const data = await response.json();
 
-    // ***************************************************** API
-    // console.log("Register with:", { username, email, password, role });
-    // handleToast("Inscription réussie !", "success");
+      if (!response.ok) {
+        handleToast(data.message || "Erreur lors de l'inscription", "error");
+        return;
+      }
 
-    // reset
-    // setUsername("");
-    // setEmail("");
-    // setPassword("");
-    // setConfirmPassword("");
-    // setRole("etudiant");
-  };
+      handleToast("Inscription réussie !", "success");
 
-  const registreFun = async () => {
-      try {
-        const response = await fetch("http://localhost:3005/register", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username : username, email : email, password : password, role : role }),
-          credentials: "include",
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          handleToast(data.message || "Erreur lors de l'inscription", "error");
-          return;
-        }
-
-        handleToast(data.message || "Inscription réussie !", "success");
-
-        // Stocker l'utilisateur localement si besoin
-        if (data.user) {
-          localStorage.setItem("user", JSON.stringify(data.user));
-        }
-
-        // Redirection selon le backend
-        if (data.redirectUrl) {
-          window.location.href = data.redirectUrl;
-        }
-
-        // Reset des champs
-        setUsername("");
-        setEmail("");
-        setPassword("");
-        setRole("");
+      // Reset du formulaire
+      setNom("");
+      setPrenom("");
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
+      setRole("etudiant");
+      navigate('/login');
 
     } catch (error) {
-      console.error("Erreur lors de l'inscription :", error);
-      handleToast("Erreur de serveur", "error");
+      console.error("Erreur:", error);
+      handleToast("Erreur réseau ou serveur", "error");
     }
   };
+
 
   return (
     <div className="auth-page">
@@ -146,8 +141,18 @@ function Register() {
               <input
                 type="text"
                 placeholder="Nom d'utilisateur"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                value={nom}
+                onChange={(e) => setNom(e.target.value)}
+                required
+              />
+            </Tooltip>
+
+            <Tooltip title={errors.prenom} open={!!errors.prenom} placement="right" arrow>
+              <input
+                type="text"
+                placeholder="Prénom"
+                value={prenom}
+                onChange={(e) => setPrenom(e.target.value)}
                 required
               />
             </Tooltip>

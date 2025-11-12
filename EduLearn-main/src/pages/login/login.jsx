@@ -1,13 +1,14 @@
 import React, { useState } from "react";
-import logo from "../assets/logo_edu.png";
-import illustration from "../assets/grad.jpg";
+import logo from "../../assets/logo_edu1.png";
+import illustration from "../../assets/grad.jpg";
 import { Link } from "react-router-dom";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import Tooltip from "@mui/material/Tooltip";
-import '../pages/login.css';
+import "./login.css";
+import { useNavigate } from 'react-router-dom';
 
 
 const Alert = React.forwardRef(function Alert(props, ref) {
@@ -15,6 +16,7 @@ const Alert = React.forwardRef(function Alert(props, ref) {
 });
 
 function Login() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -41,8 +43,9 @@ function Login() {
     password: "",
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     const newErrors = { email: "", password: "" };
     let hasError = false;
 
@@ -64,50 +67,59 @@ function Login() {
       return;
     }
 
-    loginFun();
-   
+    try {
+      const dataLogin = {
+        email: email,
+        motDePasse: password,
+      };
 
-    // console.log("Login with:", { email, password });
-    // handleToast("Connexion réussie !", "success");
-
-    // reset
-    // setEmail("");
-    // setPassword("");
-  };
-
-  const loginFun = async () => {
-     try {
-      const response = await fetch("http://localhost:3005/login", {
+      const response = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email : email, motDePasse: password }),
-        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(dataLogin),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        handleToast(data.message || "Erreur de connexion", "error");
+        handleToast(data.message || "Email ou mot de passe incorrect", "error");
         return;
       }
 
-      handleToast(data.message || "Connexion réussie !", "success");
+      handleToast("Connexion réussie !", "success");
 
-      // Stocker l'utilisateur si besoin
-      localStorage.setItem("user", JSON.stringify(data.user));
-
-      // Redirection
-      if (data.redirectUrl) {
-        window.location.href = data.redirectUrl;
+      // Stockage du token et des infos utilisateur
+      if (data.token) {
+        localStorage.setItem("token", data.token); // inutile de JSON.stringify ici si c'est déjà une chaîne
+      }
+      if (data.user) {
+        localStorage.setItem("user", JSON.stringify(data.user));
       }
 
+      // Reset du formulaire
       setEmail("");
       setPassword("");
+
+      // Gestion de la redirection selon le rôle
+      const role = data.user?.role?.toLowerCase();
+
+      if (role === "enseignant") {
+        navigate("/teacher-dashboard");
+      } else if (role === "etudiant") {
+        navigate("/dashboard");
+      } else {
+        navigate("/"); // par défaut, au cas où le rôle est inconnu
+      }
+
     } catch (error) {
-      console.error("Erreur lors de la connexion :", error);
-      handleToast("Erreur de serveur", "error");
+      console.error("Erreur:", error);
+      handleToast("Erreur réseau ou serveur", "error");
     }
+
   };
+
 
   return (
     <div className="auth-page">
@@ -149,9 +161,21 @@ function Login() {
 
             <button type="submit">Se connecter</button>
           </form>
-          <p style={{ marginTop: "0.5rem", fontSize: "0.9rem" }}>
-            Pas de compte ? <Link to="/register">Créer un compte</Link>
-          </p>
+
+          {/* 🌸 Liens sous le formulaire */}
+          <div style={{ marginTop: "0.8rem", textAlign: "center", fontSize: "0.9rem" }}>
+            <p>
+              Pas de compte ?{" "}
+              <Link to="/register" style={{ color: "var(--secondary-color)", fontWeight: "bold", textDecoration: "none" }}>
+                Créer un compte
+              </Link>
+            </p>
+            <p style={{ marginTop: "0.4rem" }}>
+              <Link to="/forgot-password" style={{ color: "var(--secondary-color)", textDecoration: "none" }}>
+                Mot de passe oublié ?
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
 
