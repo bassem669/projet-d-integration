@@ -20,7 +20,7 @@ import TeacherDashboard from "./pages/enseignant/TeacherDashboard";
 import DashboardEtudiant from "./pages/etudiant/DashboardEtudiant";
 import MesCours from "./pages/etudiant/MesCours";
 import Quiz from "./pages/etudiant/Quiz";
-import Progression from "./pages/etudiant/Progression";
+import DetailQuiz from "./pages/etudiant/DetailQuiz";
 import Profil from "./pages/etudiant/Profil";
 import DetailCours from "./pages/etudiant/DetailCours";
 
@@ -65,7 +65,8 @@ function AppContent() {
         <Route path="/dashboard" element={<DashboardEtudiant />} />
         <Route path="/cours" element={<MesCours />} />
         <Route path="/quiz" element={<Quiz />} />
-        <Route path="/progression" element={<Progression />} />
+        <Route path="/quiz/:id" element={<DetailQuiz />} />
+        
         <Route path="/profil" element={<Profil />} />
         <Route path="/cours/:id" element={<DetailCours />} />
       </Routes>

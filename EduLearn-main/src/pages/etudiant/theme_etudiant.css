@@ -1,1725 +1,722 @@
-/* Styles pour le lien "Voir tous les cours" */
-.view-all-courses {
-  text-align: center;
-  margin-top: 2rem;
-  padding-top: 2rem;
-  border-top: 1px solid #e2e8f0;
+/* === THÈME ÉTUDIANT HARMONISÉ AVEC ENSEIGNANT === */
+
+/* Variables de couleurs harmonisées */
+:root {
+  --primary-color: #2C3E50;
+  --secondary-color: #3498DB;
+  --accent-color: #ff8800;
+  --success-color: #27AE60;
+  --warning-color: #F39C12;
+  --light-bg: #F8F9FA;
+  --text-dark: #2C3E50;
+  --text-light: #7F8C8D;
+  --white: #FFFFFF;
 }
 
-.view-all-link {
-  color: #3b82f6;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 1.1rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border: 2px solid #3b82f6;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-}
-
-.view-all-link:hover {
-  background: #3b82f6;
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-}
-
-/* Correction pour les boutons de démarrage avec Link */
-.start-button {
-  width: 100%;
-  background: #3b82f6;
-  color: white;
-  border: none;
-  padding: 0.75rem;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  text-decoration: none;
-  display: block;
-  text-align: center;
-}
-
-.start-button:hover {
-  background: #2563eb;
-  color: white;
-  text-decoration: none;
-}
-.dashboard-etudiant * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-.dashboard-etudiant body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f8fafc;
-  color: #334155;
-  line-height: 1.6;
-}
-
-.dashboard-etudiant .app-container {
-  display: flex;
+/* Layout principal harmonisé */
+.dashboard {
   min-height: 100vh;
-}
-
-/* Top Navigation Bar */
-.dashboard-etudiant .top-nav {
-  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-  color: white;
-  padding: 0.5rem 2rem;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  height: 70px; /* Hauteur fixe */
 }
 
-
-
-.dashboard-etudiant .nav-menu {
+/* Sidebar harmonisée avec enseignant */
+.sidebar {
+  width: 290px;
+  background-color: var(--primary-color);
+  color: var(--white);
+  min-height: 100vh;
   display: flex;
-  gap: 2rem;
-  list-style: none;
+  flex-direction: column;
+  padding: 2rem 1rem;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
 }
 
-.dashboard-etudiant .nav-menu a {
-  color: white;
-  text-decoration: none;
-  font-weight: 500;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  transition: background-color 0.3s ease;
-}
-
-.dashboard-etudiant .nav-menu a:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-.dashboard-etudiant .user-profile {
+.dashboard-logo {
   display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.dashboard-etudiant .profile-pic {
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(135deg, #f97316 0%, #22c55e 100%);
-  border-radius: 50%;
-  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: white;
-  font-weight: bold;
-  font-size: 1rem;
-}
-
-/* Main Layout */
-.dashboard-etudiant .main-layout {
-  display: flex;
-  margin-top: 70px;
-  min-height: calc(100vh - 70px);
-}
-
-/* Sidebar */
-.dashboard-etudiant .sidebar {
-  width: 250px;
-  background: white;
-  padding: 2rem 1.5rem;
-  border-right: 1px solid #e2e8f0;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
-  position: fixed;
-  height: calc(100vh - 70px);
-  overflow-y: auto;
-}
-
-.dashboard-etudiant .sidebar-menu {
-  list-style: none;
-  margin-top: 2rem;
-}
-
-.dashboard-etudiant .sidebar-item {
-  margin-bottom: 0.5rem;
-}
-
-.dashboard-etudiant .sidebar-link {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  color: #475569;
-  text-decoration: none;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-  font-weight: 500;
-}
-
-.dashboard-etudiant .sidebar-link:hover {
-  background-color: #f1f5f9;
-  color: #1e40af;
-}
-
-.dashboard-etudiant .sidebar-link.active {
-  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
-  color: white;
-}
-
-.dashboard-etudiant .sidebar-icon {
-  font-size: 1.2rem;
-  width: 20px;
+  gap: 10px;
+  margin-bottom: 2rem;
+  background-color: #1a2530;
+  padding: 15px 20px;
+  border-radius: 12px;
   text-align: center;
 }
 
-/* Main Content */
-.dashboard-etudiant .main-content {
-  flex: 1;
-  margin-left: 250px;
-  padding: 2rem;
-  background: #f8fafc;
+.dashboard-logo span {
+  color: var(--white);
+  font-weight: bold;
+  font-size: 1.5rem;
+  white-space: nowrap;
 }
 
-/* Welcome Section */
-.dashboard-etudiant .welcome-section {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  margin-bottom: 2rem;
-  border-left: 4px solid #3b82f6;
-}
-
-.dashboard-etudiant .welcome-title {
-  font-size: 2rem;
-  color: #1e293b;
-  margin-bottom: 0.5rem;
-  font-weight: 700;
-}
-
-.dashboard-etudiant .welcome-subtitle {
-  color: #64748b;
+/* Items de sidebar harmonisés */
+.sidebar-item {
+  padding: 12px 15px;
+  margin-bottom: 10px;
+  border-radius: 8px;
   font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.sidebar-item:hover {
+  background-color: #34495e;
+}
+
+.sidebar-item.active {
+  background-color: var(--accent-color);
+}
+
+.sidebar-link {
+  color: var(--white);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.sidebar-icon {
+  font-size: 1.4rem;
+  margin-right: 10px;
+}
+
+/* Contenu principal */
+.content {
+  flex-grow: 1;
+  padding: 2.5rem 3rem;
+  background-color: var(--light-bg);
+}
+
+/* Cartes harmonisées */
+.card-modern {
+  border-radius: 15px;
+  background-color: var(--white);
+  padding: 2rem;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+  text-align: center;
+  transition: transform 0.2s;
+  border: none;
+}
+
+.card-modern:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+/* Boutons harmonisés */
+.btn {
+  border-radius: 10px;
+  font-size: 1.1rem;
+  padding: 0.6rem 1.2rem;
+  transition: all 0.3s;
+  border: none;
+}
+
+.btn:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+.btn-primary {
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+}
+
+/* Barre de progression harmonisée */
+.progress-modern {
+  height: 12px;
+  border-radius: 8px;
+  background-color: #e0e7ff;
+}
+
+.progress-modern .progress-bar {
+  background-color: var(--secondary-color);
+  border-radius: 8px;
+}
+
+/* Badges */
+.badge {
+  font-size: 0.9rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+}
+
+/* Formulaires */
+.form-control {
+  border-radius: 10px;
+  padding: 0.6rem 1rem;
+  font-size: 1.1rem;
+  border: 1px solid #ddd;
+}
+
+.form-control:focus {
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+}
+
+/* Sections spécifiques */
+.welcome-section {
+  margin-bottom: 2rem;
+}
+
+.welcome-section h1 {
+  font-weight: 700;
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-dark);
+}
+
+.welcome-subtitle {
+  font-size: 1.2rem;
+  color: var(--text-light);
   margin-bottom: 1.5rem;
 }
 
-.dashboard-etudiant .search-bar {
+.search-bar {
   display: flex;
+  gap: 10px;
   max-width: 500px;
 }
 
-.dashboard-etudiant .search-input {
-  flex: 1;
-  padding: 0.75rem 1rem;
-  border: 1px solid #d1d5db;
-  border-radius: 8px 0 0 8px;
-  font-size: 1rem;
-  outline: none;
-}
-
-.dashboard-etudiant .search-input:focus {
-  border-color: #3b82f6;
-}
-
-.dashboard-etudiant .search-button {
-  background: #3b82f6;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0 8px 8px 0;
-  cursor: pointer;
-  font-weight: 500;
-  transition: background-color 0.3s ease;
-}
-
-.dashboard-etudiant .search-button:hover {
-  background: #2563eb;
-}
-
-/* Courses Section */
-.dashboard-etudiant .courses-section {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  margin-bottom: 2rem;
-}
-
-.dashboard-etudiant .section-title {
-  font-size: 1.5rem;
-  color: #1e293b;
-  margin-bottom: 1.5rem;
-  font-weight: 600;
-}
-
-.dashboard-etudiant .courses-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
-}
-
-.dashboard-etudiant .course-card {
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 1.5rem;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.dashboard-etudiant .course-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 4px;
-  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
-}
-
-.dashboard-etudiant .course-card:nth-child(2)::before {
-  background: linear-gradient(90deg, #f97316, #eab308);
-}
-
-.dashboard-etudiant .course-card:nth-child(3)::before {
-  background: linear-gradient(90deg, #22c55e, #10b981);
-}
-
-.dashboard-etudiant .course-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-}
-
-.dashboard-etudiant .course-header {
+/* Cours */
+.course-header {
   display: flex;
+  justify-content: space-between;
   align-items: flex-start;
-  justify-content: space-between;
   margin-bottom: 1rem;
 }
 
-.dashboard-etudiant .course-icon {
-  width: 50px;
-  height: 50px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 1.5rem;
+.course-icon {
+  font-size: 2rem;
 }
 
-.dashboard-etudiant .course-card:nth-child(2) .course-icon {
-  background: linear-gradient(135deg, #f97316, #eab308);
+.course-progress {
+  margin: 1rem 0;
 }
 
-.dashboard-etudiant .course-card:nth-child(3) .course-icon {
-  background: linear-gradient(135deg, #22c55e, #10b981);
-}
-
-.dashboard-etudiant .course-badge {
-  background: #f1f5f9;
-  color: #64748b;
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 500;
-}
-
-.dashboard-etudiant .course-title {
-  font-size: 1.2rem;
-  color: #1e293b;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-}
-
-.dashboard-etudiant .course-description {
-  color: #64748b;
-  font-size: 0.9rem;
-  margin-bottom: 1.5rem;
-  line-height: 1.5;
-}
-
-.dashboard-etudiant .course-progress {
-  margin-bottom: 1.5rem;
-}
-
-.dashboard-etudiant .progress-text {
+.progress-text {
   display: flex;
   justify-content: space-between;
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
-  color: #64748b;
 }
 
-.dashboard-etudiant .progress-bar {
-  height: 6px;
-  background: #e2e8f0;
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.dashboard-etudiant .progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
-  border-radius: 10px;
-}
-
-.dashboard-etudiant .course-card:nth-child(2) .progress-fill {
-  background: linear-gradient(90deg, #f97316, #eab308);
-}
-
-.dashboard-etudiant .course-card:nth-child(3) .progress-fill {
-  background: linear-gradient(90deg, #22c55e, #10b981);
-}
-
-.dashboard-etudiant .start-button {
-  width: 100%;
-  background: #3b82f6;
-  color: white;
-  border: none;
-  padding: 0.75rem;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.dashboard-etudiant .start-button:hover {
-  background: #2563eb;
-}
-
-/* Right Sidebar */
-.dashboard-etudiant .right-sidebar {
-  width: 300px;
-  background: white;
-  padding: 2rem 1.5rem;
-  border-left: 1px solid #e2e8f0;
-  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.05);
-  position: fixed;
-  right: 0;
-  height: calc(100vh - 70px);
-  overflow-y: auto;
-}
-
-.dashboard-etudiant .stats-section {
-  margin-bottom: 2rem;
-}
-
-.dashboard-etudiant .stats-title {
-  font-size: 1.3rem;
-  color: #1e293b;
-  margin-bottom: 1.5rem;
-  font-weight: 600;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid #e2e8f0;
-}
-
-.dashboard-etudiant .stats-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 1.5rem;
-  border-radius: 12px;
-  margin-bottom: 1.5rem;
-}
-
-.dashboard-etudiant .stats-value {
-  font-size: 2rem;
-  font-weight: bold;
-  margin-bottom: 0.5rem;
-}
-
-.dashboard-etudiant .stats-label {
-  font-size: 0.9rem;
-  opacity: 0.9;
-}
-
-.dashboard-etudiant .badges-section {
-  margin-top: 2rem;
-}
-
-.dashboard-etudiant .badges-title {
-  font-size: 1.3rem;
-  color: #1e293b;
-  margin-bottom: 1rem;
-  font-weight: 600;
-}
-
-.dashboard-etudiant .badges-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-}
-
-.dashboard-etudiant .badge-item {
-  background: #f8fafc;
-  border: 2px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 1rem;
-  text-align: center;
-  transition: all 0.3s ease;
-}
-
-.dashboard-etudiant .badge-item:hover {
-  border-color: #3b82f6;
-  transform: scale(1.05);
-}
-
-.dashboard-etudiant .badge-icon {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-}
-
-.dashboard-etudiant .badge-name {
-  font-size: 0.8rem;
-  color: #64748b;
-  font-weight: 500;
-}
-
-/* Responsive Design */
-@media (max-width: 1024px) {
-  .main-layout {
+/* Responsive */
+@media (max-width: 768px) {
+  .dashboard {
     flex-direction: column;
   }
   
   .sidebar {
-    position: static;
     width: 100%;
-    height: auto;
+    min-height: auto;
   }
   
-  .main-content {
-    margin-left: 0;
+  .content {
+    padding: 1.5rem;
   }
   
-  .right-sidebar {
-    position: static;
-    width: 100%;
-    height: auto;
+  .search-bar {
+    flex-direction: column;
   }
 }
 
-@media (max-width: 768px) {
-  .top-nav {
-    padding: 1rem;
-  }
-  
-  .nav-menu {
-    display: none;
-  }
-  
-  .courses-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .main-content {
-    padding: 1rem;
-  }
-  
-  .badges-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-}
-/* Courses Page Specific Styles */
-.dashboard-etudiant .courses-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 2rem;
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-}
+/* Couleurs textuelles */
+.text-primary { color: var(--secondary-color) !important; }
+.text-success { color: var(--success-color) !important; }
+.text-warning { color: var(--warning-color) !important; }
 
-.dashboard-etudiant .page-title {
-  font-size: 2.2rem;
-  color: #1e293b;
-  margin-bottom: 0.5rem;
-  font-weight: 700;
-}
-
-.dashboard-etudiant .page-subtitle {
-  color: #64748b;
-  font-size: 1.1rem;
-  max-width: 500px;
-}
-
-.dashboard-etudiant .header-actions {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-}
-
-.dashboard-etudiant .filter-button {
-  background: white;
-  border: 1px solid #d1d5db;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 500;
-  transition: all 0.3s ease;
-}
-
-.dashboard-etudiant .filter-button:hover {
-  border-color: #3b82f6;
-  color: #3b82f6;
-}
-
-/* Categories Section */
-.dashboard-etudiant .categories-section {
-  background: white;
-  padding: 1.5rem 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  margin-bottom: 2rem;
-}
-
-.dashboard-etudiant .categories-list {
-  display: flex;
-  gap: 1rem;
-  overflow-x: auto;
-  padding-bottom: 0.5rem;
-}
-
-.dashboard-etudiant .category-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 25px;
-  background: white;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-  font-weight: 500;
-}
-
-.dashboard-etudiant .category-btn:hover {
-  border-color: #3b82f6;
-  color: #3b82f6;
-}
-
-.dashboard-etudiant .category-btn.active {
-  background: #3b82f6;
-  color: white;
-  border-color: #3b82f6;
-}
-
-.dashboard-etudiant .category-count {
-  background: #f1f5f9;
-  color: #64748b;
-  padding: 0.2rem 0.6rem;
-  border-radius: 12px;
-  font-size: 0.8rem;
+/* Background colors */
+.bg-primary { background-color: var(--secondary-color) !important; }
+/* Styles spécifiques pour MesCours */
+.course-title {
   font-weight: 600;
+  color: var(--text-dark);
+  line-height: 1.3;
 }
 
-.dashboard-etudiant .category-btn.active .category-count {
-  background: rgba(255, 255, 255, 0.2);
+.course-description {
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.course-meta {
+  font-size: 0.8rem;
+}
+
+.course-actions {
+  margin-top: auto;
+  padding-top: 1rem;
+}
+
+/* Badges de niveau */
+.badge.bg-success { background-color: var(--success-color) !important; }
+.badge.bg-warning { background-color: var(--warning-color) !important; }
+.badge.bg-danger { background-color: #E74C3C !important; }
+
+/* Boutons outline harmonisés */
+.btn-outline-primary {
+  color: var(--secondary-color);
+  border-color: var(--secondary-color);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+}
+
+.btn-outline-secondary {
+  color: var(--text-light);
+  border-color: var(--text-light);
+}
+
+.btn-outline-secondary:hover {
+  background-color: var(--text-light);
+  border-color: var(--text-light);
   color: white;
 }
 
-/* Courses Grid Large */
-.dashboard-etudiant .courses-grid-section {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+/* Responsive */
+@media (max-width: 768px) {
+  .course-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .course-actions .d-flex {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .course-meta .d-flex {
+    flex-direction: column;
+    gap: 5px;
+  }
 }
 
-.dashboard-etudiant .courses-header-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-}
-
-.dashboard-etudiant .courses-count {
-  color: #64748b;
-  font-weight: normal;
-}
-
-.dashboard-etudiant .sort-options {
-  display: flex;
-  gap: 1rem;
-}
-
-.dashboard-etudiant .sort-select {
-  padding: 0.5rem 1rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  background: white;
-  cursor: pointer;
-}
-
-.dashboard-etudiant .courses-grid-large {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-  gap: 2rem;
-}
-
-.dashboard-etudiant .course-card-large {
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  overflow: hidden;
+/* Animation pour les favoris */
+.btn-outline-danger {
   transition: all 0.3s ease;
-  background: white;
 }
 
-.dashboard-etudiant .course-card-large:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+.btn-outline-danger:hover {
+  transform: scale(1.1);
 }
-
-.dashboard-etudiant .course-image {
-  position: relative;
+/* Styles spécifiques pour le Profil */
+.profile-avatar-large {
+  width: 120px;
   height: 120px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
   display: flex;
   align-items: center;
   justify-content: center;
+  color: white;
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin: 0 auto;
+  border: 4px solid var(--accent-color);
 }
 
-.dashboard-etudiant .course-icon-large {
-  font-size: 3rem;
+.form-control-plaintext {
+  padding: 0.375rem 0;
+  margin-bottom: 0;
+  line-height: 1.5;
+  background-color: transparent;
+  border: solid transparent;
+  border-width: 1px 0;
 }
 
-.dashboard-etudiant .favorite-btn {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: rgba(255, 255, 255, 0.9);
-  border: none;
-  border-radius: 50%;
+.form-label {
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 0.5rem;
+}
+
+/* Cartes de statistiques améliorées */
+.card-modern.text-center {
+  transition: all 0.3s ease;
+}
+
+.card-modern.text-center:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+/* Boutons d'action */
+.btn-outline-primary, .btn-outline-danger {
+  transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+  transform: translateY(-2px);
+}
+
+.btn-outline-danger:hover {
+  transform: translateY(-2px);
+}
+
+/* Form check personnalisé */
+.form-check-input:checked {
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+}
+
+.form-check-input:focus {
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .profile-avatar-large {
+    width: 100px;
+    height: 100px;
+    font-size: 2rem;
+  }
+  
+  .d-flex.justify-content-between.align-items-center.mb-4 {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  .btn {
+    width: 100%;
+  }
+}
+
+/* Animation pour les transitions */
+.card-modern {
+  transition: all 0.3s ease;
+}
+
+/* Style pour les champs en mode édition */
+.form-control:focus {
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+}
+
+/* Badges et indicateurs */
+.text-muted {
+  color: var(--text-light) !important;
+}
+
+/* Séparateurs */
+.border-top {
+  border-color: #e9ecef !important;
+}
+/* Styles spécifiques pour DetailCours */
+.course-icon-large {
+  font-size: 4rem;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.course-content {
+  line-height: 1.7;
+  color: var(--text-dark);
+}
+
+.course-content h4 {
+  color: var(--primary-color);
+  margin: 1.5rem 0 1rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--light-bg);
+}
+
+.course-content h5 {
+  color: var(--secondary-color);
+  margin: 1.25rem 0 0.75rem 0;
+}
+
+.course-content h6 {
+  color: var(--text-light);
+  margin: 1rem 0 0.5rem 0;
+}
+
+.course-content p {
+  margin-bottom: 1rem;
+}
+
+/* Cartes de ressources */
+.resource-card {
+  transition: all 0.3s ease;
+  background: var(--light-bg);
+  border: 1px solid #e9ecef !important;
+}
+
+.resource-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border-color: var(--secondary-color) !important;
+}
+
+.resource-icon {
   width: 40px;
   height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  font-size: 1.2rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Boutons de téléchargement */
+.download-all-btn {
   transition: all 0.3s ease;
-}
-
-.dashboard-etudiant .favorite-btn:hover {
-  background: white;
-  transform: scale(1.1);
-}
-
-.dashboard-etudiant .course-level {
-  position: absolute;
-  bottom: 1rem;
-  left: 1rem;
-  background: rgba(255, 255, 255, 0.9);
-  padding: 0.3rem 0.8rem;
-  border-radius: 12px;
-  font-size: 0.8rem;
   font-weight: 600;
 }
 
-.dashboard-etudiant .course-content {
-  padding: 1.5rem;
+.download-all-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 136, 0, 0.3);
 }
 
-.dashboard-etudiant .course-header-large {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 1rem;
+.download-all-btn:disabled {
+  background-color: #6c757d !important;
+  transform: none;
+  box-shadow: none;
+  cursor: not-allowed;
 }
 
-.dashboard-etudiant .course-title-large {
-  font-size: 1.3rem;
-  color: #1e293b;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  flex: 1;
-  margin-right: 1rem;
+/* Animation de téléchargement */
+@keyframes downloadPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
 }
 
-.dashboard-etudiant .course-rating {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  font-size: 0.9rem;
-  color: #64748b;
+.download-all-btn:disabled,
+.btn:disabled {
+  animation: downloadPulse 1s infinite;
 }
 
-.dashboard-etudiant .rating-star {
-  font-size: 1rem;
-}
-
-.dashboard-etudiant .rating-value {
-  font-weight: 600;
-  color: #1e293b;
-}
-
-.dashboard-etudiant .course-description-large {
-  color: #64748b;
-  font-size: 0.95rem;
-  line-height: 1.5;
-  margin-bottom: 1.5rem;
-}
-
-.dashboard-etudiant .course-meta {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
-}
-
-.dashboard-etudiant .meta-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  color: #64748b;
-}
-
-.dashboard-etudiant .meta-icon {
-  font-size: 1rem;
-}
-
-.dashboard-etudiant .course-progress-large {
-  margin-bottom: 1.5rem;
-  padding: 1rem;
-  background: #f8fafc;
-  border-radius: 8px;
-}
-
-.dashboard-etudiant .progress-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
-  color: #64748b;
-}
-
-.dashboard-etudiant .progress-bar-large {
-  height: 8px;
-  background: #e2e8f0;
-  border-radius: 10px;
-  overflow: hidden;
-  margin-bottom: 0.5rem;
-}
-
-.dashboard-etudiant .progress-fill-large {
-  height: 100%;
-  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
-  border-radius: 10px;
-  transition: width 0.3s ease;
-}
-
-.dashboard-etudiant .last-accessed {
-  font-size: 0.8rem;
-  color: #94a3b8;
-  font-style: italic;
-}
-
-.dashboard-etudiant .course-actions {
-  display: flex;
-  gap: 0.75rem;
-}
-
-.dashboard-etudiant .btn-continue, .dashboard-etudiant .btn-start-large {
-  flex: 1;
-  background: #3b82f6;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.dashboard-etudiant .btn-continue:hover, .btn-start-large:hover {
-  background: #2563eb;
-}
-
-.dashboard-etudiant .btn-review {
-  background: #f1f5f9;
-  color: #64748b;
-  border: 1px solid #e2e8f0;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
+/* Badges */
+.badge {
+  font-size: 0.75rem;
   font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
 }
 
-.dashboard-etudiant .btn-review:hover {
-  background: #e2e8f0;
-  color: #374151;
-}
-
-/* No Courses State */
-.dashboard-etudiant .no-courses {
-  text-align: center;
-  padding: 4rem 2rem;
-  color: #64748b;
-}
-
-.dashboard-etudiant .no-courses-icon {
-  font-size: 4rem;
-  margin-bottom: 1rem;
-}
-
-.dashboard-etudiant .no-courses h3 {
-  color: #374151;
-  margin-bottom: 0.5rem;
-  font-size: 1.5rem;
-}
-
-.dashboard-etudiant .btn-reset {
-  background: #3b82f6;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-weight: 500;
-  cursor: pointer;
-  margin-top: 1rem;
-  transition: background-color 0.3s ease;
-}
-
-.dashboard-etudiant .btn-reset:hover {
-  background: #2563eb;
-}
-
-/* Quick Stats */
-.dashboard-etudiant .quick-stats {
-  margin-bottom: 2rem;
-}
-
-.dashboard-etudiant .stat-item-large {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem;
-  background: #f8fafc;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-}
-
-.dashboard-etudiant .stat-item-large .stat-icon {
-  font-size: 1.5rem;
-  width: 50px;
-  height: 50px;
-  background: white;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.dashboard-etudiant .stat-item-large .stat-value {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #1e293b;
-}
-
-.dashboard-etudiant .stat-item-large .stat-label {
-  color: #64748b;
-  font-size: 0.9rem;
-}
-
-.dashboard-etudiant .progress-overview {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  margin-top: 2rem;
-}
-
-.dashboard-etudiant .progress-overview h4 {
-  color: #1e293b;
-  margin-bottom: 1rem;
-  font-weight: 600;
-}
-
-.dashboard-etudiant .overview-progress {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-}
-
-.dashboard-etudiant .progress-circle-large {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: conic-gradient(#3b82f6 75%, #e2e8f0 0);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #1e293b;
-  font-weight: bold;
-  font-size: 1.2rem;
-}
-
-.dashboard-etudiant .overview-details {
-  flex: 1;
-}
-
-.dashboard-etudiant .detail-item {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
-}
-
-.dashboard-etudiant .detail-label {
-  color: #64748b;
-}
-
-.dashboard-etudiant .detail-value {
-  color: #1e293b;
-  font-weight: 600;
-}
-
-/* Responsive Design for Courses Page */
-@media (max-width: 1024px) {
-  .courses-grid-large {
-    grid-template-columns: 1fr;
-  }
-  
-  .courses-header {
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-  
-  .header-actions {
-    width: 100%;
-    justify-content: space-between;
-  }
-}
-
+/* Responsive */
 @media (max-width: 768px) {
-  .course-header-large {
-    flex-direction: column;
-    gap: 0.5rem;
+  .course-icon-large {
+    font-size: 3rem;
   }
   
-  .course-actions {
-    flex-direction: column;
+  .resource-card {
+    text-align: center;
   }
   
-  .categories-list {
-    flex-wrap: wrap;
-  }
-  
-  .course-meta {
+  .d-flex.flex-wrap.gap-4 {
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem !important;
   }
 }
-/* Styles pour la navigation active */
-.dashboard-etudiant .sidebar-link.active {
-  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
-  color: white;
-}
 
-.dashboard-etudiant .profile-link {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: white;
-  text-decoration: none;
-}
-
-.dashboard-etudiant .profile-link:hover {
-  opacity: 0.8;
-}
-
-/* Styles pour les pages de construction */
-.dashboard-etudiant .page-header {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  margin-bottom: 2rem;
-}
-
-.dashboard-etudiant .page-header h1 {
-  font-size: 2rem;
-  color: #1e293b;
-  margin-bottom: 0.5rem;
-}
-
-.dashboard-etudiant .page-header p {
-  color: #64748b;
+/* Amélioration de la lisibilité */
+.lead {
   font-size: 1.1rem;
+  color: var(--text-light);
 }
 
-.dashboard-etudiant .content-placeholder {
-  background: white;
-  padding: 4rem 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  text-align: center;
-  color: #64748b;
+/* Séparateurs */
+.border-top {
+  border-color: #e9ecef !important;
 }
 
-.dashboard-etudiant .content-placeholder h2 {
-  color: #374151;
-  margin-bottom: 1rem;
-}
-/* Styles pour la navigation active */
-.dashboard-etudiant .nav-active {
-  background-color: rgba(255, 255, 255, 0.2) !important;
-  border-radius: 6px;
+/* États de focus */
+.btn:focus {
+  box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
 }
 
-.dashboard-etudiant .profile-link {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: white;
-  text-decoration: none;
-  padding: 0.25rem;
-  border-radius: 6px;
-  transition: background-color 0.3s ease;
+/* Couleurs cohérentes */
+.text-primary { color: var(--secondary-color) !important; }
+.text-secondary { color: var(--primary-color) !important; }
+.text-muted { color: var(--text-light) !important; }
+
+.bg-light {
+  background-color: var(--light-bg) !important;
+}
+/* Styles spécifiques pour Quiz */
+.quiz-card {
+  transition: all 0.3s ease;
+  border-left: 4px solid transparent;
 }
 
-.dashboard-etudiant .profile-link:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+.quiz-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  border-left-color: var(--secondary-color);
 }
 
-.dashboard-etudiant .sidebar-link.active {
-  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
-  color: white;
-}
-
-/* Styles pour les liens de navigation */
-.dashboard-etudiant .nav-menu a {
-  color: white;
-  text-decoration: none;
+/* Navigation par onglets personnalisée */
+.nav-pills .nav-link {
+  color: var(--text-dark);
+  background: none;
+  border: 1px solid #e9ecef;
+  margin-right: 0.5rem;
+  border-radius: 8px;
   font-weight: 500;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  transition: background-color 0.3s ease;
-  display: block;
-}
-
-.dashboard-etudiant .nav-menu a:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-/* Progression Page Styles */
-.dashboard-etudiant .progression-header {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  margin-bottom: 2rem;
-}
-
-.dashboard-etudiant .stats-overview {
-  margin-bottom: 2rem;
-}
-
-.dashboard-etudiant .stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
-}
-
-.dashboard-etudiant .stat-card-progression {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.dashboard-etudiant .stat-icon-progression {
-  font-size: 2rem;
-  width: 60px;
-  height: 60px;
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-}
-
-.dashboard-etudiant .stat-value-progression {
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: #1e293b;
-}
-
-.dashboard-etudiant .stat-label-progression {
-  color: #64748b;
-  font-size: 0.9rem;
-}
-
-.dashboard-etudiant .courses-progress-section {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  margin-bottom: 2rem;
-}
-
-.dashboard-etudiant .progress-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.dashboard-etudiant .progress-item {
-  padding: 1rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-}
-
-.dashboard-etudiant .progress-course-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-
-.dashboard-etudiant .course-name {
-  font-weight: 600;
-  color: #1e293b;
-}
-
-.dashboard-etudiant .course-stats {
-  display: flex;
-  gap: 1rem;
-  font-size: 0.9rem;
-}
-
-.dashboard-etudiant .progress-percent {
-  font-weight: bold;
-  color: #3b82f6;
-}
-
-.dashboard-etudiant .course-score {
-  color: #64748b;
-}
-
-.dashboard-etudiant .progress-bar-container {
-  height: 8px;
-  background: #e2e8f0;
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.dashboard-etudiant .progress-bar-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
-  border-radius: 10px;
-  transition: width 0.3s ease;
-}
-
-.dashboard-etudiant .achievements-section {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-}
-
-.dashboard-etudiant .achievements-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
-}
-
-.dashboard-etudiant .achievement-card {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
   transition: all 0.3s ease;
 }
 
-.dashboard-etudiant .achievement-card.earned {
-  background: #f0f9ff;
-  border-color: #3b82f6;
+.nav-pills .nav-link:hover {
+  background-color: var(--light-bg);
+  border-color: var(--secondary-color);
 }
 
-.dashboard-etudiant .achievement-card.locked {
+.nav-pills .nav-link.active {
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+  color: white;
+}
+
+/* Badges de difficulté */
+.badge.bg-success { background-color: var(--success-color) !important; }
+.badge.bg-warning { background-color: var(--warning-color) !important; }
+.badge.bg-danger { background-color: #E74C3C !important; }
+.badge.bg-secondary { background-color: var(--text-light) !important; }
+
+/* Cartes de statistiques améliorées */
+.card-modern.text-center {
+  transition: all 0.3s ease;
+}
+
+.card-modern.text-center:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+
+/* États des boutons */
+.btn:disabled {
+  background-color: var(--text-light);
+  border-color: var(--text-light);
+  cursor: not-allowed;
   opacity: 0.6;
-  background: #f8fafc;
 }
 
-.dashboard-etudiant .achievement-icon {
-  font-size: 2rem;
+/* Progress bar dans les quiz */
+.quiz-card .progress-modern {
+  height: 8px;
+  background-color: #e9ecef;
 }
 
-.dashboard-etudiant .achievement-name {
-  font-weight: 600;
-  color: #1e293b;
-  margin-bottom: 0.25rem;
+.quiz-card .progress-bar {
+  background-color: var(--warning-color);
+  transition: width 0.5s ease;
 }
 
-.dashboard-etudiant .achievement-desc {
-  color: #64748b;
-  font-size: 0.9rem;
+/* Responsive design */
+@media (max-width: 768px) {
+  .quiz-card .row.align-items-center {
+    text-align: center;
+  }
+  
+  .quiz-card .col-md-4.text-end {
+    text-align: center !important;
+    margin-top: 1rem;
+  }
+  
+  .nav-pills {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .nav-pills .nav-link {
+    margin-right: 0;
+    text-align: center;
+  }
+  
+  .d-flex.flex-wrap.gap-4 {
+    justify-content: center;
+    gap: 1rem !important;
+  }
 }
 
-.dashboard-etudiant .achievement-status {
-  margin-left: auto;
+/* Animation pour les interactions */
+.quiz-card {
+  animation: fadeInUp 0.5s ease;
 }
 
-/* Analytics Sidebar */
-.dashboard-etudiant .analytics-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.dashboard-etudiant .analytics-card {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-}
-
-.dashboard-etudiant .analytics-value {
-  font-size: 2rem;
-  font-weight: bold;
-  color: #3b82f6;
-  margin: 0.5rem 0;
-}
-
-.dashboard-etudiant .goal-progress {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.dashboard-etudiant .goal-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid #f1f5f9;
-}
-
-.dashboard-etudiant .goal-status {
-  font-weight: 600;
-  color: #64748b;
-}
-
-.dashboard-etudiant .goal-status.achieved {
-  color: #22c55e;
-}
-
-.dashboard-etudiant .study-calendar {
-  display: flex;
-  gap: 0.5rem;
-  margin: 1rem 0;
-}
-
-.dashboard-etudiant .calendar-day {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background: #f1f5f9;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.dashboard-etudiant .calendar-day.active {
-  background: #3b82f6;
-  color: white;
-}
-
-.dashboard-etudiant .calendar-note {
-  font-size: 0.8rem;
-  color: #64748b;
-  text-align: center;
-}
-
-.dashboard-etudiant .next-goal {
-  text-align: center;
-}
-
-.dashboard-etudiant .goal-progress-bar {
-  height: 6px;
-  background: #e2e8f0;
-  border-radius: 10px;
-  margin: 1rem 0;
-  overflow: hidden;
-}
-
-.dashboard-etudiant .goal-progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #22c55e, #10b981);
-  border-radius: 10px;
-}
-
-.dashboard-etudiant .goal-remaining {
-  color: #64748b;
-  font-size: 0.9rem;
-}
-
-/* Profile Page Styles */
-.dashboard-etudiant .profile-header {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  margin-bottom: 2rem;
-}
-
-.dashboard-etudiant .header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-
-.dashboard-etudiant .profile-avatar-section {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-}
-
-.dashboard-etudiant .profile-avatar-large {
-  width: 80px;
-  height: 80px;
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 1.5rem;
-  font-weight: bold;
-}
-
-.dashboard-etudiant .profile-info {
-  flex: 1;
-}
-
-.dashboard-etudiant .profile-level {
-  color: #3b82f6;
-  font-weight: 600;
-  margin: 0.25rem 0;
-}
-
-.dashboard-etudiant .profile-join-date {
-  color: #64748b;
-  font-size: 0.9rem;
-}
-
-.dashboard-etudiant .edit-profile-btn {
-  background: #3b82f6;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.dashboard-etudiant .edit-profile-btn:hover {
-  background: #2563eb;
-}
-
-.dashboard-etudiant .edit-profile-btn.save {
-  background: #22c55e;
-}
-
-.dashboard-etudiant .edit-profile-btn.save:hover {
-  background: #16a34a;
-}
-
-.dashboard-etudiant .edit-name-fields {
-  display: flex;
-  gap: 1rem;
-}
-
-.dashboard-etudiant .name-input {
-  padding: 0.5rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 1.5rem;
-  font-weight: bold;
-}
-
-.dashboard-etudiant .profile-stats {
-  margin-bottom: 2rem;
-}
-
-.dashboard-etudiant .stats-grid-profile {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
-}
-
-.dashboard-etudiant .stat-card-profile {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.dashboard-etudiant .stat-icon-profile {
-  font-size: 2rem;
-  width: 60px;
-  height: 60px;
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-}
-
-.dashboard-etudiant .stat-value-profile {
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: #1e293b;
-}
-
-.dashboard-etudiant .stat-label-profile {
-  color: #64748b;
-  font-size: 0.9rem;
-}
-
-.dashboard-etudiant .profile-info-section {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-}
-
-.dashboard-etudiant .profile-info-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
-}
-
-.dashboard-etudiant .info-card {
-  padding: 1.5rem;
-  border: 1px solid #e2e8f0;
+/* Section d'aide */
+.card-modern .text-center.p-3 {
+  transition: all 0.3s ease;
   border-radius: 8px;
 }
 
-.dashboard-etudiant .info-card-title {
-  font-size: 1.2rem;
-  color: #1e293b;
-  margin-bottom: 1rem;
-  font-weight: 600;
+.card-modern .text-center.p-3:hover {
+  background-color: var(--light-bg);
+  transform: translateY(-2px);
 }
 
-.dashboard-etudiant .info-fields {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+/* Couleurs textuelles cohérentes */
+.text-success { color: var(--success-color) !important; }
+.text-warning { color: var(--warning-color) !important; }
+.text-danger { color: #E74C3C !important; }
+.text-info { color: var(--secondary-color) !important; }
+
+/* Amélioration de la lisibilité */
+.small {
+  font-size: 0.875rem;
 }
 
-.dashboard-etudiant .info-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+.lead {
+  font-size: 1.1rem;
+  color: var(--text-light);
 }
 
-.dashboard-etudiant .info-field label {
-  font-weight: 600;
-  color: #374151;
-  font-size: 0.9rem;
+/* Espacement amélioré */
+.mb-4 {
+  margin-bottom: 1.5rem !important;
 }
 
-.dashboard-etudiant .info-value {
-  color: #64748b;
+.gap-4 {
+  gap: 1.5rem !important;
 }
-
-.dashboard-etudiant .info-input, .info-select {
-  padding: 0.5rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 1rem;
-}
-
-.dashboard-etudiant .bio-textarea {
-  padding: 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-family: inherit;
-  font-size: 1rem;
-  resize: vertical;
-  min-height: 100px;
-}
-
-.dashboard-etudiant .bio-content {
-  color: #64748b;
-  line-height: 1.6;
-}
-
-.dashboard-etudiant .notification-settings {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.dashboard-etudiant .notification-item {
-  display: flex;
-  align-items: center;
-}
-
-.dashboard-etudiant .notification-label {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  cursor: pointer;
+/* Styles pour les onglets */
+.nav-pills .nav-link {
+  color: var(--text-dark);
+  background: none;
+  border: 1px solid #e9ecef;
+  margin-right: 0.5rem;
+  border-radius: 8px;
   font-weight: 500;
 }
 
-.dashboard-etudiant .notification-checkbox {
-  width: 18px;
-  height: 18px;
+.nav-pills .nav-link.active {
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+  color: white;
 }
 
-.dashboard-etudiant .account-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+/* Styles pour les fichiers */
+.form-control[type="file"] {
+  padding: 0.375rem;
 }
 
-.dashboard-etudiant .account-btn {
-  padding: 0.75rem 1rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  background: white;
-  cursor: pointer;
-  text-align: left;
-  transition: all 0.3s ease;
-}
-
-.dashboard-etudiant .account-btn:hover {
-  background: #f8fafc;
-  border-color: #d1d5db;
-}
-
-.dashboard-etudiant .account-btn.change-password {
-  border-color: #3b82f6;
-  color: #3b82f6;
-}
-
-.dashboard-etudiant .account-btn.download-data {
-  border-color: #10b981;
-  color: #10b981;
-}
-
-.dashboard-etudiant .account-btn.delete-account {
-  border-color: #ef4444;
-  color: #ef4444;
-}
-
-/* Profile Sidebar */
-.dashboard-etudiant .profile-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.dashboard-etudiant .quick-action-card {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-}
-
-.dashboard-etudiant .quick-stats {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-top: 1rem;
-}
-
-.dashboard-etudiant .quick-stat {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid #f1f5f9;
-}
-
-.dashboard-etudiant .quick-value {
-  font-weight: 600;
-  color: #3b82f6;
-}
-
-.dashboard-etudiant .recommendations {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin-top: 1rem;
-}
-
-.dashboard-etudiant .recommendation-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem;
-  border-radius: 6px;
-  background: #f8fafc;
-}
-
-.dashboard-etudiant .rec-icon {
-  font-size: 1.2rem;
-}
-
-.dashboard-etudiant .settings-links {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin-top: 1rem;
-}
-
-.dashboard-etudiant .settings-link {
-  color: #3b82f6;
-  text-decoration: none;
-  padding: 0.5rem;
-  border-radius: 6px;
-  transition: background-color 0.3s ease;
-}
-
-.dashboard-etudiant .settings-link:hover {
-  background: #f0f9ff;
-}
-
-
-/* Logo Styles */
-.dashboard-etudiant .logo {
-  display: flex;
-  align-items: center;
-  height: 100%;
-}
-
-.dashboard-etudiant .logo-image {
-  height: 100px; /* Taille parfaite pour 70px de navbar */
-  width: auto;
-  object-fit: contain;
+.form-control[type="file"]::file-selector-button {
+  padding: 0.375rem 0.75rem;
+  margin: -0.375rem -0.75rem;
+  margin-inline-end: 0.75rem;
+  background: var(--light-bg);
+  border: 0;
+  border-radius: 4px;
 }

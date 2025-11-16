@@ -1,387 +1,290 @@
-import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import Navbar from "../Navbar";
+import MenuEtudiant from './MenuEtudiant';
 import './theme_etudiant.css';
 
 const Profil = () => {
-  const location = useLocation();
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({});
+  const [originalData, setOriginalData] = useState({});
 
-  const [userData, setUserData] = useState({
-    firstName: "Nom",
-    lastName: "Prénom",
-    email: "nom.prenom@email.com",
-    phone: "+33 1 23 45 67 89",
-    level: "Intermédiaire",
-    joinDate: "15 Janvier 2024",
-    bio: "Étudiant passionné par l'apprentissage en ligne et le développement personnel.",
-    notifications: {
-      email: true,
-      push: false,
-      sms: true
-    }
-  });
+  useEffect(() => {
+    // Simulation appel API
+    setTimeout(() => {
+      const userData = {
+        idUtilisateur: 1,
+        nom: "Dupont",
+        prenom: "Marie",
+        email: "marie.dupont@example.com",
+        motDePasse: "********", // Mot de passe masqué
+        niveau: "Licence 3",
+        role: "etudiant",
+        created_at: "2025-11-10"
+      };
+      setUser(userData);
+      setFormData(userData);
+      setOriginalData(userData);
+      setLoading(false);
+    }, 500);
+  }, []);
+
+  // 🔧 LOGIQUE DE MODIFICATION
 
   const handleInputChange = (field, value) => {
-    setUserData(prev => ({
+    setFormData(prev => ({
       ...prev,
       [field]: value
     }));
   };
 
-  const handleNotificationChange = (type, value) => {
-    setUserData(prev => ({
-      ...prev,
-      notifications: {
-        ...prev.notifications,
-        [type]: value
-      }
-    }));
+  const handleEdit = () => {
+    setIsEditing(true);
+    setOriginalData(formData);
   };
 
-  const userStats = {
-    coursesCompleted: 8,
-    totalStudyTime: "156h 30m",
-    averageScore: 87,
-    currentStreak: 12,
-    badgesEarned: 15
+  const handleCancel = () => {
+    setIsEditing(false);
+    setFormData(originalData);
   };
 
-  return (
-    <>
-    <Navbar />  {/* ✅ Navbar affichée en haut */}
-    <div className="dashboard-layout dashboard-etudiant">
-    <div className="app-container">
+  const handleSave = () => {
+    // Validation des données
+    if (!formData.nom || !formData.prenom || !formData.email) {
+      alert("Veuillez remplir les champs obligatoires");
+      return;
+    }
 
-      <div className="main-layout">
-        {/* Sidebar */}
-        <aside className="sidebar">
-          <nav>
-            <ul className="sidebar-menu">
-              <li className="sidebar-item">
-                <Link 
-                  to="/dashboard" 
-                  className={`sidebar-link ${location.pathname === '/dashboard' || location.pathname === '/' ? 'active' : ''}`}
-                >
-                  <span className="sidebar-icon">📊</span>
-                  Tableau de bord
-                </Link>
-              </li>
-              <li className="sidebar-item">
-                <Link 
-                  to="/cours" 
-                  className={`sidebar-link ${location.pathname === '/cours' ? 'active' : ''}`}
-                >
-                  <span className="sidebar-icon">📚</span>
-                  Mes cours
-                </Link>
-              </li>
-              <li className="sidebar-item">
-                <Link 
-                  to="/quiz" 
-                  className={`sidebar-link ${location.pathname === '/quiz' ? 'active' : ''}`}
-                >
-                  <span className="sidebar-icon">✏️</span>
-                  Quiz & Évaluations
-                </Link>
-              </li>
-              <li className="sidebar-item">
-                <Link 
-                  to="/progression" 
-                  className={`sidebar-link ${location.pathname === '/progression' ? 'active' : ''}`}
-                >
-                  <span className="sidebar-icon">📈</span>
-                  Progression
-                </Link>
-              </li>
-              <li className="sidebar-item">
-                <Link 
-                  to="/profil" 
-                  className={`sidebar-link ${location.pathname === '/profil' ? 'active' : ''}`}
-                >
-                  <span className="sidebar-icon">👤</span>
-                  Mon profil
-                </Link>
-              </li>
-              <li className="sidebar-item">
-                <a href="#deconnexion" className="sidebar-link">
-                  <span className="sidebar-icon">🚪</span>
-                  Déconnexion
-                </a>
-              </li>
-            </ul>
-          </nav>
-        </aside>
+    if (formData.email && !isValidEmail(formData.email)) {
+      alert("Veuillez entrer un email valide");
+      return;
+    }
 
-        {/* Main Content */}
-        <main className="main-content">
-          {/* Header Section */}
-          <section className="profile-header">
-            <div className="header-content">
-              <div className="profile-avatar-section">
-                <div className="profile-avatar-large">
-                  NP
-                </div>
-                <div className="profile-info">
-                  <h1 className="page-title">
-                    {isEditing ? (
-                      <div className="edit-name-fields">
-                        <input
-                          type="text"
-                          value={userData.firstName}
-                          onChange={(e) => handleInputChange('firstName', e.target.value)}
-                          className="name-input"
-                        />
-                        <input
-                          type="text"
-                          value={userData.lastName}
-                          onChange={(e) => handleInputChange('lastName', e.target.value)}
-                          className="name-input"
-                        />
-                      </div>
-                    ) : (
-                      `${userData.firstName} ${userData.lastName}`
-                    )}
-                  </h1>
-                  <p className="profile-level">{userData.level}</p>
-                  <p className="profile-join-date">Membre depuis {userData.joinDate}</p>
-                </div>
-              </div>
-              <button 
-                className={`edit-profile-btn ${isEditing ? 'save' : 'edit'}`}
-                onClick={() => setIsEditing(!isEditing)}
-              >
-                {isEditing ? '💾 Sauvegarder' : '✏️ Modifier le profil'}
-              </button>
-            </div>
-          </section>
+    // Simulation sauvegarde
+    console.log("Données sauvegardées:", {
+      nom: formData.nom,
+      prenom: formData.prenom,
+      email: formData.email,
+      niveau: formData.niveau
+      // Le mot de passe serait géré séparément
+    });
 
-          {/* Profile Stats */}
-          <section className="profile-stats">
-            <div className="stats-grid-profile">
-              <div className="stat-card-profile">
-                <div className="stat-icon-profile">📚</div>
-                <div className="stat-content-profile">
-                  <div className="stat-value-profile">{userStats.coursesCompleted}</div>
-                  <div className="stat-label-profile">Cours terminés</div>
-                </div>
-              </div>
-              
-              <div className="stat-card-profile">
-                <div className="stat-icon-profile">⏱️</div>
-                <div className="stat-content-profile">
-                  <div className="stat-value-profile">{userStats.totalStudyTime}</div>
-                  <div className="stat-label-profile">Temps d'étude</div>
-                </div>
-              </div>
-              
-              <div className="stat-card-profile">
-                <div className="stat-icon-profile">📈</div>
-                <div className="stat-content-profile">
-                  <div className="stat-value-profile">{userStats.averageScore}%</div>
-                  <div className="stat-label-profile">Score moyen</div>
-                </div>
-              </div>
-              
-              <div className="stat-card-profile">
-                <div className="stat-icon-profile">🏆</div>
-                <div className="stat-content-profile">
-                  <div className="stat-value-profile">{userStats.badgesEarned}</div>
-                  <div className="stat-label-profile">Badges obtenus</div>
-                </div>
-              </div>
-            </div>
-          </section>
+    setUser(formData);
+    setIsEditing(false);
+    
+    // Mise à jour localStorage
+    const updatedUser = { ...user, ...formData };
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+    
+    alert("✅ Profil mis à jour avec succès !");
+  };
 
-          {/* Profile Information */}
-          <section className="profile-info-section">
-            <div className="profile-info-grid">
-              {/* Personal Information */}
-              <div className="info-card">
-                <h3 className="info-card-title">Informations personnelles</h3>
-                <div className="info-fields">
-                  <div className="info-field">
-                    <label>Email</label>
-                    {isEditing ? (
-                      <input
-                        type="email"
-                        value={userData.email}
-                        onChange={(e) => handleInputChange('email', e.target.value)}
-                        className="info-input"
-                      />
-                    ) : (
-                      <span className="info-value">{userData.email}</span>
-                    )}
-                  </div>
-                  
-                  <div className="info-field">
-                    <label>Téléphone</label>
-                    {isEditing ? (
-                      <input
-                        type="tel"
-                        value={userData.phone}
-                        onChange={(e) => handleInputChange('phone', e.target.value)}
-                        className="info-input"
-                      />
-                    ) : (
-                      <span className="info-value">{userData.phone}</span>
-                    )}
-                  </div>
-                  
-                  <div className="info-field">
-                    <label>Niveau</label>
-                    {isEditing ? (
-                      <select 
-                        value={userData.level}
-                        onChange={(e) => handleInputChange('level', e.target.value)}
-                        className="info-select"
-                      >
-                        <option>Débutant</option>
-                        <option>Intermédiaire</option>
-                        <option>Avancé</option>
-                        <option>Expert</option>
-                      </select>
-                    ) : (
-                      <span className="info-value">{userData.level}</span>
-                    )}
-                  </div>
-                </div>
-              </div>
+  const isValidEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
-              {/* Bio Section */}
-              <div className="info-card">
-                <h3 className="info-card-title">À propos de moi</h3>
-                {isEditing ? (
-                  <textarea
-                    value={userData.bio}
-                    onChange={(e) => handleInputChange('bio', e.target.value)}
-                    className="bio-textarea"
-                    rows="4"
-                    placeholder="Décrivez-vous en quelques mots..."
-                  />
-                ) : (
-                  <p className="bio-content">{userData.bio}</p>
-                )}
-              </div>
+  const hasChanges = () => {
+    return JSON.stringify(formData) !== JSON.stringify(originalData);
+  };
 
-              {/* Notifications Settings */}
-              <div className="info-card">
-                <h3 className="info-card-title">Paramètres de notification</h3>
-                <div className="notification-settings">
-                  <div className="notification-item">
-                    <label className="notification-label">
-                      <input
-                        type="checkbox"
-                        checked={userData.notifications.email}
-                        onChange={(e) => handleNotificationChange('email', e.target.checked)}
-                        className="notification-checkbox"
-                      />
-                      <span className="checkmark"></span>
-                      Notifications par email
-                    </label>
-                  </div>
-                  
-                  <div className="notification-item">
-                    <label className="notification-label">
-                      <input
-                        type="checkbox"
-                        checked={userData.notifications.push}
-                        onChange={(e) => handleNotificationChange('push', e.target.checked)}
-                        className="notification-checkbox"
-                      />
-                      <span className="checkmark"></span>
-                      Notifications push
-                    </label>
-                  </div>
-                  
-                  <div className="notification-item">
-                    <label className="notification-label">
-                      <input
-                        type="checkbox"
-                        checked={userData.notifications.sms}
-                        onChange={(e) => handleNotificationChange('sms', e.target.checked)}
-                        className="notification-checkbox"
-                      />
-                      <span className="checkmark"></span>
-                      Notifications SMS
-                    </label>
-                  </div>
-                </div>
-              </div>
+  const handleChangePassword = () => {
+    alert("Fonctionnalité de changement de mot de passe à implémenter");
+  };
 
-              {/* Account Actions */}
-              <div className="info-card">
-                <h3 className="info-card-title">Actions du compte</h3>
-                <div className="account-actions">
-                  <button className="account-btn change-password">
-                    🔒 Changer le mot de passe
-                  </button>
-                  <button className="account-btn download-data">
-                    📥 Télécharger mes données
-                  </button>
-                  <button className="account-btn delete-account">
-                    🗑️ Supprimer le compte
-                  </button>
-                </div>
-              </div>
-            </div>
-          </section>
-        </main>
-
-        {/* Right Sidebar - Quick Actions */}
-        <aside className="right-sidebar">
-          <div className="profile-sidebar">
-            <h3 className="stats-title">Actions rapides</h3>
-            
-            <div className="quick-action-card">
-              <h4>🎯 Objectifs du mois</h4>
-              <div className="quick-stats">
-                <div className="quick-stat">
-                  <span>Progression:</span>
-                  <span className="quick-value">75%</span>
-                </div>
-                <div className="quick-stat">
-                  <span>Cours en cours:</span>
-                  <span className="quick-value">4</span>
-                </div>
-                <div className="quick-stat">
-                  <span>Quiz ce mois:</span>
-                  <span className="quick-value">8/10</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="quick-action-card">
-              <h4>📚 Recommandations</h4>
-              <div className="recommendations">
-                <div className="recommendation-item">
-                  <span className="rec-icon">💻</span>
-                  <span>Python Avancé</span>
-                </div>
-                <div className="recommendation-item">
-                  <span className="rec-icon">📊</span>
-                  <span>Data Analysis</span>
-                </div>
-                <div className="recommendation-item">
-                  <span className="rec-icon">🌐</span>
-                  <span>Web Development</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="quick-action-card">
-              <h4>⚙️ Paramètres</h4>
-              <div className="settings-links">
-                <a href="#privacy" className="settings-link">🔒 Confidentialité</a>
-                <a href="#security" className="settings-link">🛡️ Sécurité</a>
-                <a href="#preferences" className="settings-link">🎛️ Préférences</a>
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <div className="dashboard">
+          <MenuEtudiant />
+          <div className="content">
+            <div className="text-center py-5">
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Chargement...</span>
               </div>
             </div>
           </div>
-        </aside>
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <Navbar />
+      <div className="dashboard">
+        <MenuEtudiant />
+        
+        <div className="content">
+          <div className="d-flex justify-content-between align-items-center mb-4">
+            <h3>Mon Profil</h3>
+            <button 
+              className={`btn ${isEditing ? 'btn-success' : 'btn-primary'}`}
+              onClick={isEditing ? handleSave : handleEdit}
+              disabled={isEditing && !hasChanges()}
+            >
+              {isEditing ? '💾 Sauvegarder' : '✏️ Modifier le profil'}
+            </button>
+          </div>
+          
+          {/* Informations principales */}
+          <div className="card-modern p-4">
+            <h5 className="mb-4">Informations personnelles</h5>
+            
+            <div className="row">
+              {/* Nom */}
+              <div className="col-md-6">
+                <div className="mb-3">
+                  <label className="form-label">Nom *</label>
+                  {isEditing ? (
+                    <input 
+                      type="text" 
+                      className="form-control" 
+                      value={formData.nom} 
+                      onChange={(e) => handleInputChange('nom', e.target.value)}
+                      placeholder="Votre nom"
+                    />
+                  ) : (
+                    <input type="text" className="form-control" value={user.nom} readOnly />
+                  )}
+                </div>
+              </div>
+
+              {/* Prénom */}
+              <div className="col-md-6">
+                <div className="mb-3">
+                  <label className="form-label">Prénom *</label>
+                  {isEditing ? (
+                    <input 
+                      type="text" 
+                      className="form-control" 
+                      value={formData.prenom} 
+                      onChange={(e) => handleInputChange('prenom', e.target.value)}
+                      placeholder="Votre prénom"
+                    />
+                  ) : (
+                    <input type="text" className="form-control" value={user.prenom} readOnly />
+                  )}
+                </div>
+              </div>
+
+              {/* Email */}
+              <div className="col-md-6">
+                <div className="mb-3">
+                  <label className="form-label">Email *</label>
+                  {isEditing ? (
+                    <input 
+                      type="email" 
+                      className="form-control" 
+                      value={formData.email} 
+                      onChange={(e) => handleInputChange('email', e.target.value)}
+                      placeholder="votre@email.com"
+                    />
+                  ) : (
+                    <input type="email" className="form-control" value={user.email} readOnly />
+                  )}
+                </div>
+              </div>
+
+              {/* Niveau */}
+              <div className="col-md-6">
+                <div className="mb-3">
+                  <label className="form-label">Niveau *</label>
+                  {isEditing ? (
+                    <select 
+                      className="form-select"
+                      value={formData.niveau}
+                      onChange={(e) => handleInputChange('niveau', e.target.value)}
+                    >
+                      <option value="Licence 1">Licence 1</option>
+                      <option value="Licence 2">Licence 2</option>
+                      <option value="Licence 3">Licence 3</option>
+                      <option value="Master 1">Master 1</option>
+                      <option value="Master 2">Master 2</option>
+                      <option value="Doctorat">Doctorat</option>
+                    </select>
+                  ) : (
+                    <input type="text" className="form-control" value={user.niveau} readOnly />
+                  )}
+                </div>
+              </div>
+
+              {/* Mot de passe (toujours en lecture seule) */}
+              <div className="col-12">
+                <div className="mb-3">
+                  <label className="form-label">Mot de passe</label>
+                  <div className="input-group">
+                    <input 
+                      type="password" 
+                      className="form-control" 
+                      value="********" 
+                      readOnly 
+                    />
+                    <button 
+                      className="btn btn-outline-primary"
+                      type="button"
+                      onClick={handleChangePassword}
+                    >
+                      🔒 Changer
+                    </button>
+                  </div>
+                  <div className="form-text">
+                    Le mot de passe ne peut pas être modifié ici. Utilisez le bouton "Changer".
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Informations supplémentaires (lecture seule) */}
+            <div className="row mt-4 pt-3 border-top">
+              <div className="col-md-6">
+                <div className="mb-2">
+                  <strong>Rôle:</strong> {user.role}
+                </div>
+                <div className="mb-2">
+                  <strong>Membre depuis:</strong> {new Date(user.created_at).toLocaleDateString()}
+                </div>
+              </div>
+              <div className="col-md-6">
+                <div className="mb-2">
+                  <strong>Statut:</strong> <span className="text-success">Actif</span>
+                </div>
+                <div className="mb-2">
+                  <strong>ID Utilisateur:</strong> {user.idUtilisateur}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Boutons en mode édition */}
+          {isEditing && (
+            <div className="card-modern p-4 mt-4">
+              <div className="d-flex gap-2 justify-content-between align-items-center">
+                <div className="text-muted small">
+                  {hasChanges() ? "⚠️ Modifications non sauvegardées" : "Aucune modification"}
+                </div>
+                <div className="d-flex gap-2">
+                  <button 
+                    className="btn btn-secondary"
+                    onClick={handleCancel}
+                  >
+                    ❌ Annuler
+                  </button>
+                  <button 
+                    className="btn btn-success"
+                    onClick={handleSave}
+                    disabled={!hasChanges()}
+                  >
+                    💾 Sauvegarder
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
-    </div>
     </>
   );
 };

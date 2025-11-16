@@ -1,200 +1,150 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from "../Navbar";
-import { Link, useLocation } from 'react-router-dom';
+import MenuEtudiant from './MenuEtudiant';
 import './theme_etudiant.css';
-// Import des données centralisées
-import { allCourses, userData, badges } from '../../data/mockData';
-import { useNavigate } from "react-router-dom";
 
 const DashboardEtudiant = () => {
-  const [user] = useState(userData); // Utilise les données importées
-  const location = useLocation();
-  const [searchQuery, setSearchQuery] = useState('');
-  const navigate = useNavigate();
+  const [dashboardData, setDashboardData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
 
-  const handleLogout = () => {
-    // Supprime éventuellement les infos de l'utilisateur
-    localStorage.removeItem("user");
-    // Redirection vers la page de connexion
-    navigate("/login");
-  };
+  useEffect(() => {
+    // Récupérer l'utilisateur connecté depuis le localStorage
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      const userData = JSON.parse(storedUser);
+      setUser(userData);
+    }
 
-  // Utilise les 3 premiers cours pour le dashboard
-  const dashboardCourses = allCourses.slice(0, 3).map(course => ({
-    id: course.id,
-    title: course.title,
-    description: course.description,
-    progress: course.progress,
-    icon: course.image, // Utilise l'image comme icône
-    status: course.category === 'en-cours' ? 'En cours' :
-      course.category === 'nouveaux' ? 'Nouveau' : 'Terminé'
-  }));
+    // Simulation appel API - À REMPLACER par vos endpoints réels
+    const fetchDashboardData = async () => {
+      try {
+        // Ici vous ferez l'appel API réel
+        setTimeout(() => {
+          setDashboardData({
+            stats: {
+              totalCours: 7,
+              examensPasses: 2,
+              quizPasses: 5
+            },
+            coursRecents: [
+              { 
+                idCours: 3, 
+                titre: "Mathématiques Avancées", 
+                description: "Cours complet sur les concepts avancés",
+                DateCours: "2025-11-11",
+                nomClasse: "DS31"
+              },
+              { 
+                idCours: 4, 
+                titre: "Programmation Web", 
+                description: "Apprenez à créer des sites web modernes",
+                DateCours: "2026-02-01",
+                nomClasse: "DS31"
+              },
+              { 
+                idCours: 5, 
+                titre: "Histoire Moderne", 
+                description: "Étude des événements historiques",
+                DateCours: "2026-02-02",
+                nomClasse: "DS31"
+              }
+            ]
+          });
+          setLoading(false);
+        }, 500);
+      } catch (error) {
+        console.error("Erreur lors du chargement du dashboard:", error);
+        setLoading(false);
+      }
+    };
 
-  // Calcul des statistiques réelles
-  const stats = {
-    progressionGlobale: Math.round(allCourses.reduce((acc, course) => acc + course.progress, 0) / allCourses.length),
-    coursSuivis: allCourses.filter(c => c.progress > 0).length,
-    quizReussis: Math.floor(allCourses.reduce((acc, course) => acc + course.progress, 0) / 10) // Simulation
-  };
+    fetchDashboardData();
+  }, []);
+
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <div className="dashboard">
+          <MenuEtudiant />
+          <div className="content">
+            <div className="text-center py-5">
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Chargement...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
-      <Navbar />  {/* ✅ Navbar affichée en haut */}
-      <div className="dashboard-layout dashboard-etudiant">
-        <div className="app-container">
+      <Navbar />
+      <div className="dashboard">
+        <MenuEtudiant />
+        
+        <div className="content">
+          {/* En-tête avec nom de l'étudiant connecté */}
+          <div className="mb-4">
+            <h3>
+              Bonjour,{" "}
+              <span className="text-primary">
+                {user ? `${user.prenom} ${user.nom}` : "Étudiant"}
+              </span> 
+              ! 👋
+            </h3>
+            <p className="text-muted">
+              {user ? `Bienvenue sur votre tableau de bord - ${user.email}` : "Connectez-vous pour voir vos données"}
+            </p>
+          </div>
 
-          <div className="main-layout">
-            {/* Sidebar */}
-            <aside className="sidebar">
-              <nav>
-                <ul className="sidebar-menu">
-                  <li className="sidebar-item">
-                    <Link
-                      to="/dashboard"
-                      className={`sidebar-link ${location.pathname === '/dashboard' || location.pathname === '/' ? 'active' : ''}`}
-                    >
-                      <span className="sidebar-icon">📊</span>
-                      Tableau de bord
-                    </Link>
-                  </li>
-                  <li className="sidebar-item">
-                    <Link
-                      to="/cours"
-                      className={`sidebar-link ${location.pathname === '/cours' ? 'active' : ''}`}
-                    >
-                      <span className="sidebar-icon">📚</span>
-                      Mes cours
-                    </Link>
-                  </li>
-                  <li className="sidebar-item">
-                    <Link
-                      to="/quiz"
-                      className={`sidebar-link ${location.pathname === '/quiz' ? 'active' : ''}`}
-                    >
-                      <span className="sidebar-icon">✏️</span>
-                      Quiz & Évaluations
-                    </Link>
-                  </li>
-                  <li className="sidebar-item">
-                    <Link
-                      to="/progression"
-                      className={`sidebar-link ${location.pathname === '/progression' ? 'active' : ''}`}
-                    >
-                      <span className="sidebar-icon">📈</span>
-                      Progression
-                    </Link>
-                  </li>
-                  <li className="sidebar-item">
-                    <Link
-                      to="/profil"
-                      className={`sidebar-link ${location.pathname === '/profil' ? 'active' : ''}`}
-                    >
-                      <span className="sidebar-icon">👤</span>
-                      Mon profil
-                    </Link>
-                  </li>
-                </ul>
-              </nav>
-            </aside>
-
-            {/* Main Content */}
-            <main className="main-content">
-              {/* Welcome Section */}
-              <section className="welcome-section">
-                <h1 className="welcome-title">Bonjour, {user.name} !</h1>
-                <p className="welcome-subtitle">
-                  Bienvenue sur votre tableau de bord EDULEARN. Continuez votre apprentissage là où vous l'avez laissé.
-                </p>
-                <div className="search-bar">
-                  <input
-                    type="text"
-                    className="search-input"
-                    placeholder="Rechercher un cours, un sujet..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                  <button className="search-button">🔍 Rechercher</button>
-                </div>
-              </section>
-
-              {/* Courses Section */}
-              <section className="courses-section">
-                <h2 className="section-title">Mes cours récents</h2>
-                <div className="courses-grid">
-                  {dashboardCourses.map(course => (
-                    <div key={course.id} className="course-card">
-                      <div className="course-header">
-                        <div className="course-icon">{course.icon}</div>
-                        <div className="course-badge">{course.status}</div>
-                      </div>
-                      <h3 className="course-title">{course.title}</h3>
-                      <p className="course-description">{course.description}</p>
-
-                      <div className="course-progress">
-                        <div className="progress-text">
-                          <span>Progression</span>
-                          <span>{course.progress}%</span>
-                        </div>
-                        <div className="progress-bar">
-                          <div
-                            className="progress-fill"
-                            style={{ width: `${course.progress}%` }}
-                          ></div>
-                        </div>
-                      </div>
-
-                      <Link
-                        to={`/cours/${course.id}`}
-                        className="start-button"
-                      >
-                        {course.progress > 0 ? 'Continuer' : 'Commencer'}
-                      </Link>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Lien vers tous les cours */}
-                <div className="view-all-courses">
-                  <Link to="/cours" className="view-all-link">
-                    Voir tous mes cours ({allCourses.length}) →
-                  </Link>
-                </div>
-              </section>
-            </main>
-
-            {/* Right Sidebar - Statistics */}
-            <aside className="right-sidebar">
-              <div className="stats-section">
-                <h3 className="stats-title">Mes statistiques</h3>
-
-                <div className="stats-card">
-                  <div className="stats-value">{stats.progressionGlobale}%</div>
-                  <div className="stats-label">Progression globale</div>
-                </div>
-
-                <div className="stats-card">
-                  <div className="stats-value">{stats.coursSuivis}/{allCourses.length}</div>
-                  <div className="stats-label">Cours suivis</div>
-                </div>
-
-                <div className="stats-card">
-                  <div className="stats-value">{stats.quizReussis}</div>
-                  <div className="stats-label">Quiz réussis</div>
-                </div>
+          {/* Statistiques générales */}
+          <div className="row g-3 mb-4">
+            <div className="col-md-4">
+              <div className="card-modern text-center p-3">
+                <div className="h4 text-primary">{dashboardData.stats.totalCours}</div>
+                <small>Cours disponibles</small>
               </div>
-
-              <div className="badges-section">
-                <h3 className="badges-title">Mes badges</h3>
-                <div className="badges-grid">
-                  {badges.map(badge => (
-                    <div key={badge.id} className="badge-item">
-                      <div className="badge-icon">{badge.icon}</div>
-                      <div className="badge-name">{badge.name}</div>
-                    </div>
-                  ))}
-                </div>
+            </div>
+            <div className="col-md-4">
+              <div className="card-modern text-center p-3">
+                <div className="h4 text-success">{dashboardData.stats.examensPasses}</div>
+                <small>Examens passés</small>
               </div>
-            </aside>
+            </div>
+            <div className="col-md-4">
+              <div className="card-modern text-center p-3">
+                <div className="h4 text-warning">{dashboardData.stats.quizPasses}</div>
+                <small>Quiz complétés</small>
+              </div>
+            </div>
+          </div>
+
+          {/* Cours récents */}
+          <div className="card-modern p-4">
+            <h5 className="mb-4">Cours récents</h5>
+            <div className="row g-3">
+              {dashboardData.coursRecents.map(cours => (
+                <div key={cours.idCours} className="col-md-4">
+                  <div className="border rounded p-3 h-100">
+                    <h6>{cours.titre}</h6>
+                    <p className="text-muted small mb-2">{cours.description}</p>
+                    <div className="small text-muted">
+                      <strong>Classe:</strong> {cours.nomClasse}
+                    </div>
+                    <div className="small text-muted mb-3">
+                      <strong>Date:</strong> {new Date(cours.DateCours).toLocaleDateString()}
+                    </div>
+                    <button className="btn btn-primary btn-sm w-100">
+                      Voir le cours
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
