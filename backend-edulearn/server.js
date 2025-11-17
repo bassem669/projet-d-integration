@@ -8,6 +8,7 @@ const app = express();
 // Middlewares
 app.use(cors());
 app.use(express.json());
+app.use('/uploads', express.static('uploads'));
 
 // Vérifier que l'env est chargé
 console.log('ENV:', process.env.DB_USER, process.env.DB_NAME);
@@ -15,6 +16,8 @@ console.log('ENV:', process.env.DB_USER, process.env.DB_NAME);
 // Routes
 app.use('/api/auth', require('./src/routes/authRoutes'));
 app.use('/api/cours', require('./src/routes/coursRoutes'));
+app.use('/api/inscription', require('./src/routes/inscriptionRoutes'));
+app.use('/api/profile', require('./src/routes/profileRoutes'));
 app.use('/api/resources', require('./src/routes/resourceRoutes'));
 const contactRoutes = require('./src/routes/contacts');
 app.use('/api/contact', contactRoutes);

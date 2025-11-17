@@ -1,4 +1,8 @@
 const connection = require('../config/db');
+const fs = require('fs');
+const path = require('path');
+require('dotenv').config();
+const UPLOAD_DIR = process.env.UPLOAD_DIR || 'uploads';
 
 exports.getAllCours = (req, res) => {
   connection.query(
@@ -16,8 +20,35 @@ exports.getAllCours = (req, res) => {
   );
 };
 
+exports.getCoursByEnseignant = (req, res) => {
+  const { idUtilisateur } = req.params;
+
+  connection.query(
+    `SELECT c.*, u.nom AS nomUtilisateur, cl.nomClasse
+     FROM Cours c
+     LEFT JOIN Utilisateur u ON c.idUtilisateur = u.idUtilisateur
+     LEFT JOIN Classe cl ON c.idClasse = cl.idClasse
+     WHERE c.idUtilisateur = ?`,
+    [idUtilisateur],
+    (err, results) => {
+      if (err) {
+        console.error("Erreur lors de la récupération des cours :", err);
+        return res.status(500).json({ message: "Erreur serveur" });
+      }
+
+      if (results.length === 0) {
+        return res.status(404).json({ message: "Aucun cours trouvé pour cet enseignant" });
+      }
+
+      res.json(results);
+    }
+  );
+};
+
 exports.createCours = (req, res) => {
-  const { titre, description, support, DateCours, idClasse, idUtilisateur } = req.body;
+  const { titre, description, DateCours, idClasse, idUtilisateur } = req.body;
+
+  const support = req.file ? req.file.filename : null;
 
   if (!titre || !idUtilisateur) {
     return res.status(400).json({ message: 'Titre et idUtilisateur sont requis' });
@@ -40,10 +71,17 @@ exports.createCours = (req, res) => {
 exports.getCoursById = (req, res) => {
   const { id } = req.params;
   connection.query(
-    'SELECT * FROM Cours WHERE idCours = ?',
+    `SELECT c.*, u.nom AS nomUtilisateur, cl.nomClasse 
+     FROM Cours c
+     LEFT JOIN Utilisateur u ON c.idUtilisateur = u.idUtilisateur
+     LEFT JOIN Classe cl ON c.idClasse = cl.idClasse
+     WHERE c.idCours = ?`,
     [id],
     (err, results) => {
-      if (err) return res.status(500).json({ message: 'Erreur serveur' });
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ message: 'Erreur serveur' });
+      }
       if (results.length === 0) return res.status(404).json({ message: 'Cours introuvable' });
       res.json(results[0]);
     }
@@ -52,17 +90,50 @@ exports.getCoursById = (req, res) => {
 
 exports.updateCours = (req, res) => {
   const { id } = req.params;
-  const { titre, description, support, DateCours, idClasse } = req.body;
+  const { titre, description, DateCours, idClasse } = req.body;
 
+  // Nouveau fichier uploadé ?
+  const newSupport = req.file ? req.file.filename : null;
+
+  // Step 1: récupérer l'ancien support dans la base
   connection.query(
-    'UPDATE Cours SET titre=?, description=?, support=?, DateCours=?, idClasse=? WHERE idCours=?',
-    [titre, description, support, DateCours, idClasse, id],
-    (err, result) => {
-      if (err) return res.status(500).json({ message: 'Erreur lors de la mise à jour' });
-      res.json({ message: 'Cours mis à jour avec succès' });
+    'SELECT support FROM Cours WHERE idCours = ?',
+    [id],
+    (err, data) => {
+      if (err) return res.status(500).json({ message: 'Erreur interne' });
+
+      if (data.length === 0)
+        return res.status(404).json({ message: 'Cours non trouvé' });
+
+      const oldSupport = data[0].support;
+
+      // Step 2: si un nouveau fichier est uploadé → supprimer l'ancien
+      if (newSupport && oldSupport) {
+        const oldFilePath = path.join(__dirname, '..', 'uploads', oldSupport);
+
+        fs.unlink(oldFilePath, (err) => {
+          if (err) console.log("⚠️ Impossible de supprimer l'ancien fichier :", err);
+        });
+      }
+
+      // Step 3: support final à sauvegarder
+      const finalSupport = newSupport ? newSupport : oldSupport;
+
+      // Step 4: mise à jour en DB
+      connection.query(
+        'UPDATE Cours SET titre=?, description=?, support=?, DateCours=?, idClasse=? WHERE idCours=?',
+        [titre, description, finalSupport, DateCours, idClasse, id],
+        (errUpdate) => {
+          if (errUpdate)
+            return res.status(500).json({ message: 'Erreur lors de la mise à jour' });
+
+          res.json({ message: 'Cours mis à jour avec succès', support: finalSupport });
+        }
+      );
     }
   );
 };
+
 
 exports.deleteCours = (req, res) => {
   const { id } = req.params;
@@ -71,3 +142,64 @@ exports.deleteCours = (req, res) => {
     res.json({ message: 'Cours supprimé avec succès' });
   });
 };
+
+exports.downloadCours = (req, res) => {
+  const { id } = req.params;
+
+  connection.query(
+    'SELECT support FROM Cours WHERE idCours = ?',
+    [id],
+    (err, results) => {
+      if (err) {
+        console.error('Erreur base de données:', err);
+        return res.status(500).json({ message: 'Erreur serveur' });
+      }
+      
+      if (results.length === 0 || !results[0].support) {
+        return res.status(404).json({ message: 'Fichier non trouvé dans la base' });
+      }
+
+      const filename = results[0].support;
+      
+      const filePath = path.join(process.cwd(), 'uploads', filename);
+      
+      console.log('🔍Recherche fichier:', filePath); // Debug
+
+      if (!fs.existsSync(filePath)) {
+        console.error(' Fichier introuvable:', filePath);
+        return res.status(404).json({ message: 'Fichier introuvable sur le serveur' });
+      }
+
+      // Définir le type de contenu
+      const ext = path.extname(filename).toLowerCase();
+      const contentTypes = {
+        '.pdf': 'application/pdf',
+        '.doc': 'application/msword',
+        '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        '.ppt': 'application/vnd.ms-powerpoint',
+        '.pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.png': 'image/png',
+        '.mp4': 'video/mp4'
+      };
+
+      const contentType = contentTypes[ext] || 'application/octet-stream';
+      res.setHeader('Content-Type', contentType);
+      
+      // Forcer le téléchargement avec le nom original
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+
+      // Stream du fichier
+      const fileStream = fs.createReadStream(filePath);
+      fileStream.pipe(res);
+
+      fileStream.on('error', (err) => {
+        console.error('Erreur streaming:', err);
+        res.status(500).json({ message: 'Erreur lors du téléchargement' });
+      });
+    }
+  );
+};
+
+
