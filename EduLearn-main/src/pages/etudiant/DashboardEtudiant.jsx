@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom'; // Import de Link
 import Navbar from "../Navbar";
 import MenuEtudiant from './MenuEtudiant';
 import './theme_etudiant.css';
@@ -138,9 +139,14 @@ const DashboardEtudiant = () => {
                     <div className="small text-muted mb-3">
                       <strong>Date:</strong> {new Date(cours.DateCours).toLocaleDateString()}
                     </div>
-                    <button className="btn btn-primary btn-sm w-100">
-                      Voir le cours
-                    </button>
+                    
+                    {/* LIEN VERS LA PAGE DÉTAIL DU COURS */}
+                    <Link 
+                      to={`/cours/${cours.idCours}`}
+                      className="btn btn-primary btn-sm w-100"
+                    >
+                      📖 Voir le cours
+                    </Link>
                   </div>
                 </div>
               ))}

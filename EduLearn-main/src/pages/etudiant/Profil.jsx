@@ -18,7 +18,7 @@ const Profil = () => {
         nom: "Dupont",
         prenom: "Marie",
         email: "marie.dupont@example.com",
-        motDePasse: "********", // Mot de passe masqué
+        motDePasse: "********",
         niveau: "Licence 3",
         role: "etudiant",
         created_at: "2025-11-10"
@@ -67,7 +67,6 @@ const Profil = () => {
       prenom: formData.prenom,
       email: formData.email,
       niveau: formData.niveau
-      // Le mot de passe serait géré séparément
     });
 
     setUser(formData);
@@ -120,13 +119,32 @@ const Profil = () => {
         <div className="content">
           <div className="d-flex justify-content-between align-items-center mb-4">
             <h3>Mon Profil</h3>
-            <button 
-              className={`btn ${isEditing ? 'btn-success' : 'btn-primary'}`}
-              onClick={isEditing ? handleSave : handleEdit}
-              disabled={isEditing && !hasChanges()}
-            >
-              {isEditing ? '💾 Sauvegarder' : '✏️ Modifier le profil'}
-            </button>
+            
+            {/* BOUTON UNIQUE : Modifier/Annuler en mode édition */}
+            {isEditing ? (
+              <div className="d-flex gap-2">
+                <button 
+                  className="btn btn-secondary"
+                  onClick={handleCancel}
+                >
+                  ❌ Annuler
+                </button>
+                <button 
+                  className="btn btn-success"
+                  onClick={handleSave}
+                  disabled={!hasChanges()}
+                >
+                  💾 Sauvegarder
+                </button>
+              </div>
+            ) : (
+              <button 
+                className="btn btn-primary"
+                onClick={handleEdit}
+              >
+                ✏️ Modifier le profil
+              </button>
+            )}
           </div>
           
           {/* Informations principales */}
@@ -211,7 +229,7 @@ const Profil = () => {
                 </div>
               </div>
 
-              {/* Mot de passe (toujours en lecture seule) */}
+              {/* Mot de passe */}
               <div className="col-12">
                 <div className="mb-3">
                   <label className="form-label">Mot de passe</label>
@@ -258,28 +276,11 @@ const Profil = () => {
             </div>
           </div>
 
-          {/* Boutons en mode édition */}
+          {/* Indicateur de modifications en mode édition */}
           {isEditing && (
-            <div className="card-modern p-4 mt-4">
-              <div className="d-flex gap-2 justify-content-between align-items-center">
-                <div className="text-muted small">
-                  {hasChanges() ? "⚠️ Modifications non sauvegardées" : "Aucune modification"}
-                </div>
-                <div className="d-flex gap-2">
-                  <button 
-                    className="btn btn-secondary"
-                    onClick={handleCancel}
-                  >
-                    ❌ Annuler
-                  </button>
-                  <button 
-                    className="btn btn-success"
-                    onClick={handleSave}
-                    disabled={!hasChanges()}
-                  >
-                    💾 Sauvegarder
-                  </button>
-                </div>
+            <div className="card-modern p-3 mt-4">
+              <div className="text-center text-muted small">
+                {hasChanges() ? "⚠️ Vous avez des modifications non sauvegardées" : "Aucune modification effectuée"}
               </div>
             </div>
           )}
