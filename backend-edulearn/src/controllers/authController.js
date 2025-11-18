@@ -4,7 +4,6 @@ const connection = require('../config/db');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 
-// Define functions as constants
 const register = (req, res) => {
   const { nom, prenom, email, motDePasse, role } = req.body;
 
@@ -50,13 +49,25 @@ const login = (req, res) => {
 
       if (!isMatch) return res.status(400).json({ message: 'Mot de passe incorrect' });
 
+      // on inclut le rôle dans le JWT
       const token = jwt.sign(
         { id: user.idUtilisateur, role: user.role },
         process.env.JWT_SECRET,
         { expiresIn: '7d' }
       );
 
-      res.json({ message: 'Connexion réussie', token, user });
+      //  Renvoi du rôle pour le frontend + middleware RBAC
+      res.json({
+        message: 'Connexion réussie',
+        token,
+        user: {
+          idUtilisateur: user.idUtilisateur,
+          nom: user.nom,
+          prenom: user.prenom,
+          email: user.email,
+          role: user.role
+        }
+      });
     }
   );
 };
@@ -173,7 +184,7 @@ const logout = (req, res) => {
   res.status(200).json({ message: 'Déconnexion réussie' });
 };
 
-// Export all functions at once
+
 module.exports = {
   register,
   login,

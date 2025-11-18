@@ -95,7 +95,7 @@ exports.updateCours = (req, res) => {
   // Nouveau fichier uploadé ?
   const newSupport = req.file ? req.file.filename : null;
 
-  // Step 1: récupérer l'ancien support dans la base
+  // récupérer l'ancien support dans la base
   connection.query(
     'SELECT support FROM Cours WHERE idCours = ?',
     [id],
@@ -107,7 +107,7 @@ exports.updateCours = (req, res) => {
 
       const oldSupport = data[0].support;
 
-      // Step 2: si un nouveau fichier est uploadé → supprimer l'ancien
+      // si un nouveau fichier est uploadé → supprimer l'ancien
       if (newSupport && oldSupport) {
         const oldFilePath = path.join(__dirname, '..', 'uploads', oldSupport);
 
@@ -116,10 +116,10 @@ exports.updateCours = (req, res) => {
         });
       }
 
-      // Step 3: support final à sauvegarder
+      // support final à sauvegarder
       const finalSupport = newSupport ? newSupport : oldSupport;
 
-      // Step 4: mise à jour en DB
+      // mise à jour en DB
       connection.query(
         'UPDATE Cours SET titre=?, description=?, support=?, DateCours=?, idClasse=? WHERE idCours=?',
         [titre, description, finalSupport, DateCours, idClasse, id],
@@ -163,7 +163,7 @@ exports.downloadCours = (req, res) => {
       
       const filePath = path.join(process.cwd(), 'uploads', filename);
       
-      console.log('🔍Recherche fichier:', filePath); // Debug
+      console.log('🔍Recherche fichier:', filePath); 
 
       if (!fs.existsSync(filePath)) {
         console.error(' Fichier introuvable:', filePath);
@@ -200,6 +200,24 @@ exports.downloadCours = (req, res) => {
       });
     }
   );
+};
+
+// Valider cours
+exports.validerCours = (req, res) => {
+  const { id } = req.params;
+  connection.query('UPDATE Cours SET status = ? WHERE idCours = ?', ['APPROVED', id], (err) => {
+    if (err) return res.status(500).json({ message: 'Erreur serveur' });
+    res.json({ message: 'Cours validé avec succès' });
+  });
+};
+
+// Refuser cours
+exports.refuserCours = (req, res) => {
+  const { id } = req.params;
+  connection.query('UPDATE Cours SET status = ? WHERE idCours = ?', ['REJECTED', id], (err) => {
+    if (err) return res.status(500).json({ message: 'Erreur serveur' });
+    res.json({ message: 'Cours refusé avec succès' });
+  });
 };
 
 
