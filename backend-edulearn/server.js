@@ -20,8 +20,12 @@ app.use('/api/inscription', require('./src/routes/inscriptionRoutes'));
 app.use('/api/profile', require('./src/routes/profileRoutes'));
 app.use('/api/resources', require('./src/routes/resourceRoutes'));
 const contactRoutes = require('./src/routes/contacts');
-app.use('/api/contact', contactRoutes);
+const statsRoutes = require('./src/routes/statsRoutes');
+const evaluationRoutes = require('./src/routes/evaluationRoute');
 
+app.use('/api/contact', contactRoutes);
+app.use('/api/statistiques', statsRoutes);
+app.use('/api/evaluations', evaluationRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'Backend éducatif opérationnel !' });
