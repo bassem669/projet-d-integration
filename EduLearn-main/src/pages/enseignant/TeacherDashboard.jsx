@@ -2,19 +2,19 @@ import React, { useState, useEffect } from "react";
 import Navbar from "../Navbar";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useNavigate } from "react-router-dom";
-import { FaSignOutAlt } from "react-icons/fa";
 import {
   FaChalkboardTeacher,
   FaUserGraduate,
   FaEnvelopeOpenText,
   FaUserCircle,
   FaBookOpen,
-  FaListAlt
+  FaQuestionCircle,
 } from "react-icons/fa";
 import "./TeacherDashboard.css";
 
 import Profil from "./Profil";
 import Cours from "./Cours";
+import QuizManagement from "./QuizManagement";
 import Etudiants from "./Etudiants";
 import Resultats from "./Resultats";
 
@@ -89,11 +89,11 @@ export default function TeacherDashboard() {
             <li className={`sidebar-item ${activeTab === "cours" ? "active" : ""}`} onClick={() => setActiveTab("cours")}>
               <FaBookOpen /> Mes cours
             </li>
+            <li className={`sidebar-item ${activeTab === "quiz" ? "active" : ""}`} onClick={() => setActiveTab("quiz")}>
+              <FaQuestionCircle /> Quiz et Evaluation
+            </li>
             <li className={`sidebar-item ${activeTab === "etudiants" ? "active" : ""}`} onClick={() => setActiveTab("etudiants")}>
               <FaUserGraduate /> Étudiants
-            </li>
-            <li className={`sidebar-item ${activeTab === "resultats" ? "active" : ""}`} onClick={() => setActiveTab("resultats")}>
-              <FaListAlt /> Résultats
             </li>
             <li className={`sidebar-item ${activeTab === "profil" ? "active" : ""}`} onClick={() => setActiveTab("profil")}>
               <FaUserCircle /> Profil
@@ -133,17 +133,6 @@ export default function TeacherDashboard() {
                   </div>
                 </div>
 
-                <div className="col-sm-6 col-md-3">
-                  <div className="card-modern text-center p-3">
-                    <FaListAlt size={40} className="mb-2 text-warning" />
-                    <h6>Progression moyenne</h6>
-                    <h3>
-                      {students.length
-                        ? Math.round(students.reduce((acc, s) => acc + s.progress, 0) / students.length)
-                        : 0}%
-                    </h3>
-                  </div>
-                </div>
               </div>
 
               {/*  Cours récents */}
@@ -168,6 +157,7 @@ export default function TeacherDashboard() {
 
           {activeTab === "cours" && <Cours />}
           {activeTab === "etudiants" && <Etudiants />}
+          {activeTab === "quiz" && <QuizManagement />}
           {activeTab === "resultats" && <Resultats />}
           {activeTab === "profil" && <Profil />}
         </div>

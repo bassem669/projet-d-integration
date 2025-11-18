@@ -24,8 +24,14 @@ import DetailQuiz from "./pages/etudiant/DetailQuiz";
 import Profil from "./pages/etudiant/Profil";
 import DetailCours from "./pages/etudiant/DetailCours";
 
-
-
+// 🛠️ Tableau de bord administrateur
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminLayout from "./pages/admin/AdminLayout";
+import UsersManagement from "./pages/admin/UsersManagement";
+import CourseModeration from "./pages/admin/CourseModeration";
+import LogsAudit from "./pages/admin/LogsAudit";
+import SecuritySettings from "./pages/admin/SecuritySettings";
+import Backup from "./pages/admin/Backup";
 
 // 🌸 Styles - ORDRE CRUCIAL !
 import "./pages/etudiant/theme_etudiant.css";
@@ -66,9 +72,19 @@ function AppContent() {
         <Route path="/cours" element={<MesCours />} />
         <Route path="/quiz" element={<Quiz />} />
         <Route path="/quiz/:id" element={<DetailQuiz />} />
-        
+
         <Route path="/profil" element={<Profil />} />
         <Route path="/cours/:id" element={<DetailCours />} />
+
+        {/* 🛠️ Tableau de bord administrateur */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<AdminDashboard />} />
+          <Route path="users" element={<UsersManagement />} />
+          <Route path="courses" element={<CourseModeration />} />
+          <Route path="logs" element={<LogsAudit />} />
+          <Route path="security" element={<SecuritySettings />} />
+          <Route path="backup" element={<Backup />} />
+        </Route>
       </Routes>
 
       {/* 🌸 Footer visible uniquement sur les pages publiques */}
