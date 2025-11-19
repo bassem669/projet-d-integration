@@ -1,5 +1,5 @@
 // controllers/evaluationController.js
-const connection = require('./db');
+const connection = require('../config/db');
 
 // Obtenir toutes les évaluations (quiz) disponibles pour un étudiant
 exports.getEvaluationsForStudent = (req, res) => {

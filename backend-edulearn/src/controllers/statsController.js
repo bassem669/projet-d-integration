@@ -1,5 +1,5 @@
 // controllers/statsController.js
-const connection = require('./db');
+const connection = require('../config/db');
 
 const getStudentStats = async (req, res) => {
     const { idEtudiant } = req.params;

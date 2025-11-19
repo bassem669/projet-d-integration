@@ -244,6 +244,48 @@ CREATE TABLE IF NOT EXISTS ReponseEvaluation (
     UNIQUE KEY unique_soumission (idEvaluation, idEtudiant)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE IF NOT EXISTS BackupHistory (
+    idBackup INT PRIMARY KEY AUTO_INCREMENT,
+    type VARCHAR(50),
+    taille VARCHAR(50),
+    statut VARCHAR(50),
+    dateBackup TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+CREATE TABLE IF NOT EXISTS SecurityStatus (
+    idSecurity INT PRIMARY KEY AUTO_INCREMENT,
+    httpsEnabled BOOLEAN,
+    rateLimit INT,
+    attemptsBlocked INT,
+    lastUpdate TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS audit_logs (
+    idLog INT PRIMARY KEY AUTO_INCREMENT,
+    adminId INT NULL,
+    action VARCHAR(255) NOT NULL,
+    method VARCHAR(10) NOT NULL,
+    route VARCHAR(255) NOT NULL,
+    ip VARCHAR(50),
+    date_action TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (adminId) REFERENCES Utilisateur(idUtilisateur)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS LoginAttempts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    idUtilisateur INT NULL,
+    success BOOLEAN NOT NULL,
+    ip VARCHAR(50),
+    date_attempt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (idUtilisateur) REFERENCES Utilisateur(idUtilisateur)
+        ON DELETE SET NULL
+);
+
+
+
 `;
 
 connection.query(createTablesQuery, (err) => {

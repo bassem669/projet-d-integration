@@ -27,6 +27,9 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/statistiques', statsRoutes);
 app.use('/api/evaluations', evaluationRoutes);
 
+app.use('/api/admin', require('./src/routes/adminRoutes'));
+
+
 app.get('/', (req, res) => {
   res.json({ message: 'Backend éducatif opérationnel !' });
 });

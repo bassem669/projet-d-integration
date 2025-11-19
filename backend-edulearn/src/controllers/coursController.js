@@ -202,22 +202,4 @@ exports.downloadCours = (req, res) => {
   );
 };
 
-// Valider cours
-exports.validerCours = (req, res) => {
-  const { id } = req.params;
-  connection.query('UPDATE Cours SET status = ? WHERE idCours = ?', ['APPROVED', id], (err) => {
-    if (err) return res.status(500).json({ message: 'Erreur serveur' });
-    res.json({ message: 'Cours validé avec succès' });
-  });
-};
-
-// Refuser cours
-exports.refuserCours = (req, res) => {
-  const { id } = req.params;
-  connection.query('UPDATE Cours SET status = ? WHERE idCours = ?', ['REJECTED', id], (err) => {
-    if (err) return res.status(500).json({ message: 'Erreur serveur' });
-    res.json({ message: 'Cours refusé avec succès' });
-  });
-};
-
 
