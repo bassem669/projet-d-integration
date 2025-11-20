@@ -109,8 +109,10 @@ function Login() {
         navigate("/teacher-dashboard");
       } else if (role === "etudiant") {
         navigate("/dashboard");
+      } else if ("/admin") {
+        navigate("/admin"); // par défaut, au cas où le rôle est inconnu
       } else {
-        navigate("/"); // par défaut, au cas où le rôle est inconnu
+        navigate("/");
       }
 
     } catch (error) {

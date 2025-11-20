@@ -33,20 +33,22 @@ import LogsAudit from "./pages/admin/LogsAudit";
 import SecuritySettings from "./pages/admin/SecuritySettings";
 import Backup from "./pages/admin/Backup";
 
-// 🌸 Styles - ORDRE CRUCIAL !
+import PrivateRoute from "./utils/PrivateRoute";
+
+// Styles
 import "./pages/etudiant/theme_etudiant.css";
 import "./App.css";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import Unauthorized from "./pages/Unauthorized";
+import ForgotPasswordEmail from "./pages/forget password/ForgotPasswordEmail";
+import ForgotPasswordCode from "./pages/forget password/ForgotPasswordCode";
+import ForgotPasswordNew from "./pages/forget password/ForgotPasswordNew";
 
-// 🧭 Composant interne pour gérer les routes + le layout
 function AppContent() {
   const location = useLocation();
 
-  // Pages publiques où le footer doit apparaître
   const pagesAvecFooter = ["/", "/contact"];
-
-  // On cache le footer sur login, register et dashboards
   const afficherFooter = pagesAvecFooter.includes(location.pathname);
 
   return (
@@ -58,42 +60,155 @@ function AppContent() {
       }
     >
       <Routes>
+
         {/* 🌸 Pages publiques */}
         <Route path="/" element={<Home />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPasswordEmail/>}/>
+        <Route path="/forgot-password/Code" element={<ForgotPasswordCode/>}/>
+        <Route path="/forgot-password/new" element={<ForgotPasswordNew/>}/>
+        <Route path="/unauthorized" element={<Unauthorized />} />
+
 
         {/* 👩‍🏫 Tableau de bord enseignant */}
-        <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
+        <Route
+          path="/teacher-dashboard"
+          element={
+            <PrivateRoute roles={["enseignant"]}>
+              <TeacherDashboard />
+            </PrivateRoute>
+          }
+        />
 
         {/* 🎓 Tableau de bord étudiant */}
-        <Route path="/dashboard" element={<DashboardEtudiant />} />
-        <Route path="/cours" element={<MesCours />} />
-        <Route path="/quiz" element={<Quiz />} />
-        <Route path="/quiz/:id" element={<DetailQuiz />} />
+        <Route
+          path="/dashboard"
+          element={
+            <PrivateRoute roles={["etudiant"]}>
+              <DashboardEtudiant />
+            </PrivateRoute>
+          }
+        />
 
-        <Route path="/profil" element={<Profil />} />
-        <Route path="/cours/:id" element={<DetailCours />} />
+        <Route
+          path="/cours"
+          element={
+            <PrivateRoute roles={["etudiant"]}>
+              <MesCours />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/cours/:id"
+          element={
+            <PrivateRoute roles={["etudiant"]}>
+              <DetailCours />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/quiz"
+          element={
+            <PrivateRoute roles={["etudiant"]}>
+              <Quiz />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/quiz/:id"
+          element={
+            <PrivateRoute roles={["etudiant"]}>
+              <DetailQuiz />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/profil"
+          element={
+            <PrivateRoute roles={["etudiant"]}>
+              <Profil />
+            </PrivateRoute>
+          }
+        />
 
         {/* 🛠️ Tableau de bord administrateur */}
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<AdminDashboard />} />
-          <Route path="users" element={<UsersManagement />} />
-          <Route path="courses" element={<CourseModeration />} />
-          <Route path="logs" element={<LogsAudit />} />
-          <Route path="security" element={<SecuritySettings />} />
-          <Route path="backup" element={<Backup />} />
+        <Route
+          path="/admin"
+          element={
+            <PrivateRoute roles={["admin"]}>
+              <AdminLayout />
+            </PrivateRoute>
+          }
+        >
+          <Route
+            index
+            element={
+              <PrivateRoute roles={["admin"]}>
+                <AdminDashboard />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="users"
+            element={
+              <PrivateRoute roles={["admin"]}>
+                <UsersManagement />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="courses"
+            element={
+              <PrivateRoute roles={["admin"]}>
+                <CourseModeration />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="logs"
+            element={
+              <PrivateRoute roles={["admin"]}>
+                <LogsAudit />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="security"
+            element={
+              <PrivateRoute roles={["admin"]}>
+                <SecuritySettings />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="backup"
+            element={
+              <PrivateRoute roles={["admin"]}>
+                <Backup />
+              </PrivateRoute>
+            }
+          />
         </Route>
+
       </Routes>
 
-      {/* 🌸 Footer visible uniquement sur les pages publiques */}
+
       {afficherFooter && <Footer />}
     </div>
   );
 }
 
-// 🌐 Composant principal
 function App() {
   return (
     <Router>

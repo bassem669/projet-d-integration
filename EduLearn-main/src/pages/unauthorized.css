@@ -1,0 +1,38 @@
+.unauthorized-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: #f5f5f5;
+  text-align: center;
+  padding: 20px;
+}
+
+.unauthorized-title {
+  font-size: 3rem;
+  font-weight: bold;
+  color: #c0392b;
+  margin-bottom: 15px;
+}
+
+.unauthorized-text {
+  font-size: 1.2rem;
+  margin-bottom: 25px;
+  color: #555;
+}
+
+.unauthorized-btn {
+  display: inline-block;
+  padding: 12px 25px;
+  background: #3498db;
+  color: white;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.unauthorized-btn:hover {
+  background: #2980b9;
+}

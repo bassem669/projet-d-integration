@@ -6,7 +6,7 @@ exports.getProfile = (req, res) => {
   const userId = req.user.id;
 
   connection.query(
-    "SELECT idUtilisateur, nom, email, phone, subject, profilePicture FROM Utilisateur WHERE idUtilisateur = ?",
+    "SELECT idUtilisateur, nom, prenom, email, phone, niveau, role, created_at FROM Utilisateur WHERE idUtilisateur = ?",
     [userId],
     (err, results) => {
       if (err) return res.status(500).json({ error: "Erreur serveur" });
@@ -19,11 +19,11 @@ exports.getProfile = (req, res) => {
 
 exports.updateProfile = (req, res) => {
   const userId = req.user.id;
-  const { nom, phone, subject } = req.body;
+  const { nom, prenom, phone, niveau } = req.body;
 
   connection.query(
-    `UPDATE Utilisateur SET nom = ?, phone = ?, subject = ? WHERE idUtilisateur = ?`,
-    [nom, phone, subject, userId],
+    `UPDATE Utilisateur SET nom = ?, prenom = ?, phone = ?, niveau = ? WHERE idUtilisateur = ?`,
+    [nom, prenom, phone, niveau, userId],
     err => {
       if (err) return res.status(500).json({ error: "Erreur serveur" });
 

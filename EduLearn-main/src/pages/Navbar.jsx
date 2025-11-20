@@ -17,6 +17,23 @@ function Navbar() {
     navigate("/");
   };
 
+  // 🔥 Correction complète
+  const navigateTo = () => {
+    if (!user) return;
+
+    const role = user.role;
+
+    if (role === "enseignant") {
+      navigate("/teacher-dashboard");
+    } 
+    else if (role === "etudiant") {
+      navigate("/dashboard");
+    } 
+    else if (role === "admin") {
+      navigate("/admin");
+    }
+  };
+
   return (
     <nav className="home-nav">
       <div className="nav-left">
@@ -30,9 +47,9 @@ function Navbar() {
           <Link to="/contact">Contact</Link>
         </div>
 
-        <div 
-          className="nav-dropdown" 
-          onMouseEnter={() => setDropdownOpen(true)} 
+        <div
+          className="nav-dropdown"
+          onMouseEnter={() => setDropdownOpen(true)}
           onMouseLeave={() => setDropdownOpen(false)}
         >
           {user ? (
@@ -40,11 +57,18 @@ function Navbar() {
               <button className="dropbtn">
                 <FaUser style={{ marginRight: "8px" }} /> Compte ▼
               </button>
+
               {dropdownOpen && (
                 <div className="dropdown-content">
-                  <Link to={user.role === "etudiant" ? "/dashboard" : "/teacher-dashboard"}>
+                  {/* 🔥 Correction : bouton, pas Link */}
+                  <button
+                    onClick={navigateTo}
+                    className="dropdown-btn"
+                    style={{ width: "100%", textAlign: "left" }}
+                  >
                     Profil
-                  </Link>
+                  </button>
+
                   <button onClick={handleLogout} className="logout-btn">
                     <FaSignOutAlt style={{ marginRight: "8px" }} /> Déconnexion
                   </button>

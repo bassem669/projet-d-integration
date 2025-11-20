@@ -1,25 +1,59 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./TeacherDashboard.css";
 
 export default function Profil() {
   const [teacher, setTeacher] = useState({
-    name: "Ahmed",
-    surname: "Ben Salah",
-    email: "ahmed.bensalah@example.com",
-    phone: "22112233",
+    name: "",
+    surname: "",
+    email: "",
+    phone: "",
     password: "",
     confirmPassword: "",
   });
 
   const [message, setMessage] = useState(null);
 
-  // ✅ Notification simple pour feedback utilisateur
+  // ================================
+  // 🔹 Notification simple
+  // ================================
   const showNotification = (type, text) => {
     setMessage({ type, text });
     setTimeout(() => setMessage(null), 3000);
   };
 
+  // ================================
+  // 🔹 Charger profil utilisateur
+  // ================================
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    fetch("http://localhost:5000/api/profil", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`, // 🔥 Envoi automatique du token
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setTeacher({
+          name: data.nom || "",
+          surname: data.prenom || "",
+          email: data.email || "",
+          phone: data.phone || "",
+          password: "",
+          confirmPassword: "",
+        });
+      })
+      .catch(() => {
+        showNotification("error", "Erreur lors du chargement du profil...");
+      });
+  }, []); // ← Ne pas ajouter teacher ici sinon boucle infinie
+
+  // ================================
+  // 🔹 Mettre à jour le profil
+  // ================================
   const handleProfileUpdate = (e) => {
     e.preventDefault();
 
@@ -28,8 +62,34 @@ export default function Profil() {
       return;
     }
 
-    showNotification("success", "Profil mis à jour avec succès !");
-    // 🔹 Ici tu peux faire un appel API pour sauvegarder dans ta base
+    const updatedData = {
+      nom: teacher.name,
+      prenom: teacher.surname,
+      email: teacher.email,
+      phone: teacher.phone,
+    };
+
+    if (teacher.password) {
+      updatedData.password = teacher.password; // 🔥 envoi uniquement si modifié
+    }
+
+    const token = localStorage.getItem("token");
+
+    fetch("http://localhost:5000/api/profil", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`, // 🔥 token dans PUT
+      },
+      body: JSON.stringify(updatedData),
+    })
+      .then((res) => res.json())
+      .then(() => {
+        showNotification("success", "Profil mis à jour avec succès !");
+      })
+      .catch(() => {
+        showNotification("error", "Erreur lors de la mise à jour du profil...");
+      });
   };
 
   return (
@@ -49,91 +109,91 @@ export default function Profil() {
               </div>
             )}
 
-            <div className="row justify-content-center">
-              <div className="col-12">
-                <h5 className="text-center mb-4">Changer les informations générales</h5>
-                <form className="form-horizontal" onSubmit={handleProfileUpdate}>
-                  <div className="form-group mb-3">
-                    <label>Nom</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={teacher.name}
-                      onChange={(e) => setTeacher({ ...teacher, name: e.target.value })}
-                    />
-                  </div>
+            <form onSubmit={handleProfileUpdate}>
+              <h5 className="text-center mb-4">Changer les informations générales</h5>
 
-                  <div className="form-group mb-3">
-                    <label>Prénom</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={teacher.surname}
-                      onChange={(e) =>
-                        setTeacher({ ...teacher, surname: e.target.value })
-                      }
-                    />
-                  </div>
-
-                  <div className="form-group mb-3">
-                    <label>Email</label>
-                    <input
-                      type="email"
-                      className="form-control"
-                      value={teacher.email}
-                      onChange={(e) =>
-                        setTeacher({ ...teacher, email: e.target.value })
-                      }
-                    />
-                  </div>
-
-                  <div className="form-group mb-3">
-                    <label>Téléphone</label>
-                    <input
-                      type="tel"
-                      className="form-control"
-                      value={teacher.phone}
-                      onChange={(e) =>
-                        setTeacher({ ...teacher, phone: e.target.value })
-                      }
-                    />
-                  </div>
-
-                  <hr />
-
-                  <h5 className="text-center mb-4">Changer le mot de passe</h5>
-                  <div className="form-group mb-3">
-                    <label>Nouveau mot de passe</label>
-                    <input
-                      type="password"
-                      className="form-control"
-                      value={teacher.password}
-                      onChange={(e) =>
-                        setTeacher({ ...teacher, password: e.target.value })
-                      }
-                    />
-                  </div>
-
-                  <div className="form-group mb-4">
-                    <label>Confirmer le mot de passe</label>
-                    <input
-                      type="password"
-                      className="form-control"
-                      value={teacher.confirmPassword}
-                      onChange={(e) =>
-                        setTeacher({ ...teacher, confirmPassword: e.target.value })
-                      }
-                    />
-                  </div>
-
-                  <div className="form-group d-flex justify-content-center">
-                    <button type="submit" className="btn btn-primary px-4 py-2">
-                      Enregistrer les modifications
-                    </button>
-                  </div>
-                </form>
+              <div className="form-group mb-3">
+                <label>Nom</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={teacher.name}
+                  onChange={(e) => setTeacher({ ...teacher, name: e.target.value })}
+                />
               </div>
-            </div>
+
+              <div className="form-group mb-3">
+                <label>Prénom</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={teacher.surname}
+                  onChange={(e) =>
+                    setTeacher({ ...teacher, surname: e.target.value })
+                  }
+                />
+              </div>
+
+              <div className="form-group mb-3">
+                <label>Email</label>
+                <input
+                  type="email"
+                  className="form-control"
+                  value={teacher.email}
+                  onChange={(e) => setTeacher({ ...teacher, email: e.target.value })}
+                />
+              </div>
+
+              <div className="form-group mb-3">
+                <label>Téléphone</label>
+                <input
+                  type="tel"
+                  className="form-control"
+                  value={teacher.phone}
+                  onChange={(e) =>
+                    setTeacher({ ...teacher, phone: e.target.value })
+                  }
+                />
+              </div>
+
+              <hr />
+
+              <h5 className="text-center mb-4">Changer le mot de passe</h5>
+
+              <div className="form-group mb-3">
+                <label>Nouveau mot de passe</label>
+                <input
+                  type="password"
+                  className="form-control"
+                  value={teacher.password}
+                  onChange={(e) =>
+                    setTeacher({ ...teacher, password: e.target.value })
+                  }
+                />
+              </div>
+
+              <div className="form-group mb-4">
+                <label>Confirmer le mot de passe</label>
+                <input
+                  type="password"
+                  className="form-control"
+                  value={teacher.confirmPassword}
+                  onChange={(e) =>
+                    setTeacher({
+                      ...teacher,
+                      confirmPassword: e.target.value,
+                    })
+                  }
+                />
+              </div>
+
+              <div className="d-flex justify-content-center">
+                <button className="btn btn-primary px-4 py-2" type="submit">
+                  Enregistrer les modifications
+                </button>
+              </div>
+            </form>
+
           </div>
         </div>
       </div>
