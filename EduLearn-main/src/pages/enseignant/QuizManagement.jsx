@@ -550,10 +550,12 @@ export default function QuizAndEvaluationManagement() {
     if (field === 'correct') {
       if (currentQuestion.type === 'choix_multiple') {
         newReponses.forEach((rep, i) => {
+          // Pour choix multiple: une seule réponse correcte
           newReponses[i] = { ...rep, correct: i === index };
         });
-      } else {
-        newReponses[index] = { ...newReponses[index], correct: value };
+      } else if (currentQuestion.type === 'vrai_faux') {
+        // Pour vrai/faux: géré séparément dans le composant
+        // Cette logique est maintenant gérée directement dans le rendu
       }
     } else {
       newReponses[index] = { ...newReponses[index], [field]: value };
@@ -571,20 +573,32 @@ export default function QuizAndEvaluationManagement() {
       return;
     }
 
+    // Pour les questions Vrai/Faux, s'assurer que les réponses sont pré-remplies
+    let questionToAdd = { ...currentQuestion };
+    if (currentQuestion.type === 'vrai_faux') {
+      questionToAdd.reponses = [
+        { reponse: "Vrai", correct: currentQuestion.reponses[0]?.correct || false },
+        { reponse: "Faux", correct: currentQuestion.reponses[1]?.correct || false }
+      ];
+    }
+
     const hasCorrectAnswer = currentQuestion.reponses.some(r => r.correct && r.reponse.trim());
     if (!hasCorrectAnswer) {
       showNotification("error", "Veuillez sélectionner au moins une réponse correcte");
       return;
     }
 
-    const allAnswersFilled = currentQuestion.reponses.every(r => r.reponse.trim() !== '');
+    const allAnswersFilled = currentQuestion.type === 'vrai_faux' ? 
+      true : // Pour Vrai/Faux, les réponses sont pré-remplies
+      questionToAdd.reponses.every(r => r.reponse.trim() !== '');
+  
     if (!allAnswersFilled) {
       showNotification("error", "Veuillez remplir toutes les réponses");
-      return;
+    return;
     }
 
     const newQuestions = [...newQuiz.questions, {
-      ...currentQuestion,
+      ...questionToAdd,
       ordre: newQuiz.questions.length
     }];
 
@@ -593,11 +607,15 @@ export default function QuizAndEvaluationManagement() {
       questions: newQuestions
     });
 
+    // Réinitialiser avec les valeurs par défaut selon le type
     setCurrentQuestion({
       enonce: "",
-      type: "choix_multiple",
+      type: currentQuestion.type, // Garder le même type
       ordre: newQuestions.length,
-      reponses: [
+      reponses: currentQuestion.type === 'vrai_faux' ? [
+        { reponse: "Vrai", correct: false },
+        { reponse: "Faux", correct: false }
+      ] : [
         { reponse: "", correct: false },
         { reponse: "", correct: false },
         { reponse: "", correct: false },
@@ -1216,6 +1234,58 @@ export default function QuizAndEvaluationManagement() {
                           </div>
                         </div>
                       ))}
+                    </div>
+                  )}
+
+                  {/* cette section pour le type Vrai/Faux */}
+                  {currentQuestion.type === 'vrai_faux' && (
+                    <div className="answers-section">
+                      <label className="form-label">Options Vrai/Faux *</label>
+                      <div className="vrai-faux-options">
+                        <div className="answer-row d-flex align-items-center mb-2">
+                          <div className="form-control me-2 bg-light">Vrai</div>
+                          <div className="form-check">
+                            <input
+                              className="form-check-input"
+                              type="radio"
+                              name="correctAnswerVraiFaux"
+                              checked={currentQuestion.reponses[0].correct}
+                              onChange={() => {
+                                const newReponses = [...currentQuestion.reponses];
+                                newReponses[0] = { reponse: "Vrai", correct: true };
+                                newReponses[1] = { reponse: "Faux", correct: false };
+                                setCurrentQuestion({
+                                  ...currentQuestion,
+                                  reponses: newReponses
+                                });
+                              }}
+                            />
+                            <label className="form-check-label">Correct</label>
+                          </div>
+                        </div>
+                        <div className="answer-row d-flex align-items-center mb-2">
+                          <div className="form-control me-2 bg-light">Faux</div>
+                          <div className="form-check">
+                            <input
+                              className="form-check-input"
+                              type="radio"
+                              name="correctAnswerVraiFaux"
+                              checked={currentQuestion.reponses[1].correct}
+                              onChange={() => {
+                                const newReponses = [...currentQuestion.reponses];
+                                newReponses[0] = { reponse: "Vrai", correct: false };
+                                newReponses[1] = { reponse: "Faux", correct: true };
+                                setCurrentQuestion({
+                                  ...currentQuestion,
+                                  reponses: newReponses
+                                });
+                              }}
+                            />
+                            <label className="form-check-label">Correct</label>
+                          </div>
+                        </div>
+                      </div>
+                      <small className="text-muted">Sélectionnez la réponse correcte (Vrai ou Faux)</small>
                     </div>
                   )}
 

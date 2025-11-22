@@ -125,14 +125,6 @@ export default function TeacherDashboard() {
                   </div>
                 </div>
 
-                <div className="col-sm-6 col-md-3">
-                  <div className="card-modern text-center p-3">
-                    <FaEnvelopeOpenText size={40} className="mb-2 text-danger" />
-                    <h6>Messages non lus</h6>
-                    <h3>{teacher.unreadMessages}</h3>
-                  </div>
-                </div>
-
               </div>
 
               {/*  Cours récents */}

@@ -55,7 +55,6 @@ export default function GestionEtudiants() {
               <tr>
                 <th>Nom</th>
                 <th>Email</th>
-                <th>Résultat</th>
               </tr>
             </thead>
             <tbody>
@@ -64,7 +63,6 @@ export default function GestionEtudiants() {
                   <tr key={s.id}>
                     <td>{s.name}</td>
                     <td>{s.email}</td>
-                    <td>{s.result}</td>
                   </tr>
                 ))
               ) : (
