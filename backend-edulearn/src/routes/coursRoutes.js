@@ -9,7 +9,7 @@ const upload = require('../middleware/upload');
 router.get('/', coursController.getAllCours);
 router.get('/enseignant/:idUtilisateur', coursController.getCoursByEnseignant);
 router.get('/:id', coursController.getCoursById);
-
+router.get('/:id/details', coursController.getCoursDetails); 
 // Protected (create/update/delete)
 router.post(
   '/', 

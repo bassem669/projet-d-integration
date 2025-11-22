@@ -1,9 +1,16 @@
-// routes/statsRoutes.js
+// routes/statsRoute.js
 const express = require('express');
 const router = express.Router();
-const { getStudentStats } = require('../controllers/statsController');
+const statsController = require('../controllers/statsController');
+const auth = require('../middleware/auth');
 
-// Route pour obtenir les statistiques d'un étudiant
-router.get('/:idEtudiant', getStudentStats);
+// Routes étudiant
+router.get('/student/:idEtudiant', auth, statsController.getStudentStats);
+
+// Routes enseignant
+router.get('/teacher/:idEnseignant', auth, statsController.getTeacherStats);
+
+// Routes admin
+router.get('/admin/dashboard', auth, statsController.getAdminDashboardStats);
 
 module.exports = router;

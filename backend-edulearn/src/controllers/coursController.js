@@ -201,5 +201,77 @@ exports.downloadCours = (req, res) => {
     }
   );
 };
+exports.getCoursDetails = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // Fonction utilitaire pour exécuter les requêtes
+    const query = (sql, params = []) => {
+      return new Promise((resolve, reject) => {
+        connection.query(sql, params, (err, results) => {
+          if (err) reject(err);
+          else resolve(results);
+        });
+      });
+    };
+
+    // Exécuter les deux requêtes en parallèle
+    const [coursResults, ressourcesResults] = await Promise.all([
+      query(
+        `SELECT 
+           c.idCours,
+           c.titre,
+           c.description,
+           c.support,
+           c.DateCours,
+           c.created_at,
+           c.updated_at,
+           u.nom AS nomEnseignant, 
+           u.prenom AS prenomEnseignant
+         FROM Cours c
+         LEFT JOIN Utilisateur u ON c.idUtilisateur = u.idUtilisateur
+         WHERE c.idCours = ?`,
+        [id]
+      ),
+      query(
+        `SELECT 
+           id,
+           type,
+           url,
+           created_at
+         FROM Resources 
+         WHERE courseId = ?`,
+        [id]
+      )
+    ]);
+
+    if (coursResults.length === 0) {
+      return res.status(404).json({ message: 'Cours introuvable' });
+    }
+
+    const cours = coursResults[0];
+
+    const coursDetails = {
+      informations: {
+        idCours: cours.idCours,
+        titre: cours.titre,
+        description: cours.description,
+        support: cours.support,
+        DateCours: cours.DateCours,
+        created_at: cours.created_at,
+        updated_at: cours.updated_at,
+        nomEnseignant: cours.nomEnseignant,
+        prenomEnseignant: cours.prenomEnseignant
+      },
+      ressources: ressourcesResults
+    };
+
+    res.json(coursDetails);
+
+  } catch (err) {
+    console.error('Erreur lors de la récupération des détails du cours:', err);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+};
 
 
