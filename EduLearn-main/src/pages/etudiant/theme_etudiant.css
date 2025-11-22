@@ -720,3 +720,59 @@
   border: 0;
   border-radius: 4px;
 }
+/* OVERRIDE FORCE pour le modal de mot de passe */
+.password-modal-backdrop.modal-backdrop.show.d-block {
+  background-color: rgba(0, 0, 0, 0.279) !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 9999 !important;
+  opacity: 1 !important;
+}
+
+.password-modal-content.modal-content {
+  background-color: #ffffff !important;
+  border: 2px solid #dee2e6 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+  opacity: 1 !important;
+  z-index: 10000 !important;
+}
+
+.password-modal-header.modal-header {
+  background-color: #f8f9fa !important;
+  border-bottom: 2px solid #dee2e6 !important;
+  border-radius: 12px 12px 0 0 !important;
+  padding: 1rem 1.5rem !important;
+  opacity: 1 !important;
+}
+
+.password-modal-body.modal-body {
+  background-color: #ffffff !important;
+  padding: 1.5rem !important;
+  opacity: 1 !important;
+}
+
+.password-modal-footer.modal-footer {
+  background-color: #f8f9fa !important;
+  border-top: 2px solid #dee2e6 !important;
+  border-radius: 0 0 12px 12px !important;
+  padding: 1rem 1.5rem !important;
+  opacity: 1 !important;
+}
+
+/* Styles pour les inputs */
+.password-input.form-control {
+  background-color: #ffffff !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 6px !important;
+  padding: 0.75rem !important;
+  opacity: 1 !important;
+}
+
+.password-input.form-control:focus {
+  border-color: #007bff !important;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important;
+}

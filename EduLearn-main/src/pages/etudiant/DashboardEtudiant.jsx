@@ -24,9 +24,9 @@ const DashboardEtudiant = () => {
         setTimeout(() => {
           setDashboardData({
             stats: {
-              totalCours: 7,
-              examensPasses: 2,
-              quizPasses: 5
+              totalCours: 0,
+              examensDisponibles: 0,
+              quizDisponible: 0
             },
             coursRecents: [
               { 
@@ -112,14 +112,14 @@ const DashboardEtudiant = () => {
             </div>
             <div className="col-md-4">
               <div className="card-modern text-center p-3">
-                <div className="h4 text-success">{dashboardData.stats.examensPasses}</div>
-                <small>Examens passés</small>
+                <div className="h4 text-success">{dashboardData.stats.examensDisponibles}</div>
+                <small>Examens disponibles</small>
               </div>
             </div>
             <div className="col-md-4">
               <div className="card-modern text-center p-3">
-                <div className="h4 text-warning">{dashboardData.stats.quizPasses}</div>
-                <small>Quiz complétés</small>
+                <div className="h4 text-warning">{dashboardData.stats.quizDisponible}</div>
+                <small>Quizs disponibles</small>
               </div>
             </div>
           </div>

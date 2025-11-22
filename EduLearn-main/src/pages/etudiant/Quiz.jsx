@@ -194,39 +194,7 @@ const Quiz = () => {
                 )}
               </div>
 
-              {/* Résultats Quiz */}
-              <div className="card-modern p-4">
-                <h5 className="mb-4">📊 Mes Résultats - Quiz</h5>
-                
-                {quizData.resultatsQuiz.length > 0 ? (
-                  <div className="table-responsive">
-                    <table className="table table-modern">
-                      <thead>
-                        <tr>
-                          <th>Quiz</th>
-                          <th>Note</th>
-                          <th>Date</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {quizData.resultatsQuiz.map(resultat => (
-                          <tr key={resultat.idResultat}>
-                            <td>{resultat.titreQuiz}</td>
-                            <td>
-                              <span className={`badge ${resultat.note >= 70 ? 'bg-success' : 'bg-warning'}`}>
-                                {resultat.note}/100
-                              </span>
-                            </td>
-                            <td>{new Date(resultat.date).toLocaleDateString()}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <p className="text-muted text-center">Aucun résultat de quiz disponible.</p>
-                )}
-              </div>
+              
             </>
           )}
 
@@ -284,50 +252,7 @@ const Quiz = () => {
                 )}
               </div>
 
-              {/* Évaluations rendues */}
-              <div className="card-modern p-4">
-                <h5 className="mb-4">✅ Évaluations Rendues</h5>
-                
-                {quizData.evaluations.filter(evaluation => evaluation.statut === 'rendu').length > 0 ? (
-                  <div className="table-responsive">
-                    <table className="table table-modern">
-                      <thead>
-                        <tr>
-                          <th>Évaluation</th>
-                          <th>Cours</th>
-                          <th>Date rendu</th>
-                          <th>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {quizData.evaluations.filter(evaluation => evaluation.statut === 'rendu').map(evaluation => (
-                          <tr key={evaluation.idEvaluation}>
-                            <td>{evaluation.titre}</td>
-                            <td>{evaluation.nomCours}</td>
-                            <td>{new Date(evaluation.dateLimite).toLocaleDateString()}</td>
-                            <td>
-                              <button 
-                                className="btn btn-outline-primary btn-sm me-2"
-                                onClick={() => downloadReponse(evaluation.fichierReponse, evaluation.titre)}
-                              >
-                                📥 Ma réponse
-                              </button>
-                              <button 
-                                className="btn btn-outline-secondary btn-sm"
-                                onClick={() => downloadEvaluation(evaluation.fichierEvaluation, evaluation.titre)}
-                              >
-                                📄 Énoncé
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <p className="text-muted text-center">Aucune évaluation rendue.</p>
-                )}
-              </div>
+              
             </>
           )}
         </div>
