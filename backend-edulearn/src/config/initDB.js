@@ -45,6 +45,11 @@ const createTablesQuery = `
       FOREIGN KEY (idUtilisateur) REFERENCES Utilisateur(idUtilisateur)
     )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+
+ALTER TABLE Cours 
+ADD COLUMN IF NOT EXISTS statut VARCHAR(20) DEFAULT 'en_attente' 
+CHECK (statut IN ('en_attente', 'valide', 'refuse')) AFTER DateCours;
+
     CREATE TABLE IF NOT EXISTS Resources (
       id INT AUTO_INCREMENT PRIMARY KEY,
       courseId INT,
@@ -213,6 +218,8 @@ ADD COLUMN IF NOT EXISTS ordre INT DEFAULT 0 AFTER idQuiz;
 
 ALTER TABLE ResultatQuiz 
 ADD COLUMN IF NOT EXISTS tempsUtilise INT AFTER note;
+
+
 
 -- Create PDF Evaluations tables
 CREATE TABLE IF NOT EXISTS EvaluationPDF (

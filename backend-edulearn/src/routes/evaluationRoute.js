@@ -1,20 +1,23 @@
-// routes/evaluationRoutes.js
+// routes/evaluationRoute.js
 const express = require('express');
 const router = express.Router();
 const evaluationController = require('../controllers/evaluationController');
+const auth = require('../middleware/auth');
 
-// Middleware d'authentification
-const auth = require('../middleware/authMiddleware');
+// ==================== ROUTES ÉTUDIANT ====================
+router.get('/student/evaluations', auth, evaluationController.getEvaluationsForStudent);
+router.get('/student/evaluations/:id', auth, evaluationController.getEvaluationById);
+router.post('/student/evaluations/:id/submit', auth, evaluationController.submitEvaluation);
+router.get('/student/evaluation-results', auth, evaluationController.getStudentEvaluationResults);
+router.get('/student/evaluation-stats', auth, evaluationController.getEvaluationStats);
+router.get('/student/evaluations/course/:coursId', auth, evaluationController.getEvaluationsByCourse);
 
-// Appliquer l'authentification à toutes les routes
-router.use(auth);
-
-// Routes pour les évaluations
-router.get('/', evaluationController.getEvaluationsForStudent);
-router.get('/cours/:coursId', evaluationController.getEvaluationsByCourse);
-router.get('/resultats/mes-resultats', evaluationController.getStudentEvaluationResults);
-router.get('/stats/mes-statistiques', evaluationController.getEvaluationStats);
-router.get('/:id', evaluationController.getEvaluationById);  // <--- À LA FIN !
-router.post('/:id/soumettre', evaluationController.submitEvaluation);
+// ==================== ROUTES ENSEIGNANT ====================
+router.post('/teacher/evaluations', auth, evaluationController.createEvaluation);
+router.get('/teacher/evaluations', auth, evaluationController.getTeacherEvaluations);
+router.get('/teacher/evaluations/:id', auth, evaluationController.getEvaluationDetailsForTeacher);
+router.post('/teacher/evaluations/:id/questions', auth, evaluationController.addQuestionToEvaluation);
+router.get('/teacher/evaluations/:id/results', auth, evaluationController.getEvaluationResultsDetails);
+router.get('/teacher/evaluation-stats', auth, evaluationController.getTeacherEvaluationStats);
 
 module.exports = router;
