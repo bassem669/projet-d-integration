@@ -18,19 +18,12 @@ const AdminLayout = () => {
     return (
         <div className="admin-dashboard-container">
             {/* TOP NAV */}
-            {/* === HEADER ADMIN - VERSION FINALE 20/20 VALIDÉE PAR TOUS LES PROFS === */}
             <header className="admin-top-nav">
                 <div className="admin-top-left">
                     <img src={logo} alt="EduLearn" className="logo-image" />
                 </div>
 
                 <div className="admin-top-right">
-                    {/* Notifications avec badge */}
-                    <div className="admin-notification-wrapper">
-                        <Bell size={26} className="admin-bell-icon" />
-                        <span className="admin-notification-badge">3</span>
-                    </div>
-
                     {/* Profil admin */}
                     <div className="admin-profile-wrapper">
                         <div className="admin-profile-info">
