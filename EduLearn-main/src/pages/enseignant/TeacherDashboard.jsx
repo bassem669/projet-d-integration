@@ -9,6 +9,7 @@ import {
   FaUserCircle,
   FaBookOpen,
   FaQuestionCircle,
+  FaComments,
 } from "react-icons/fa";
 import "./TeacherDashboard.css";
 
@@ -17,6 +18,7 @@ import Cours from "./Cours";
 import QuizManagement from "./QuizManagement";
 import Etudiants from "./Etudiants";
 import Resultats from "./Resultats";
+import ForumEnseignant from "./ForumEnseignant";
 
 export default function TeacherDashboard() {
   const navigate = useNavigate();
@@ -120,6 +122,9 @@ export default function TeacherDashboard() {
             </li>
             <li className={`sidebar-item ${activeTab === "etudiants" ? "active" : ""}`} onClick={() => setActiveTab("etudiants")}>
               <FaUserGraduate /> Étudiants
+            </li>
+            <li className={`sidebar-item ${activeTab === "forum" ? "active" : ""}`} onClick={() => setActiveTab("forum")}>
+              <FaComments /> Forum
             </li>
             <li className={`sidebar-item ${activeTab === "profil" ? "active" : ""}`} onClick={() => setActiveTab("profil")}>
               <FaUserCircle /> Profil
@@ -248,6 +253,7 @@ export default function TeacherDashboard() {
           {activeTab === "etudiants" && <Etudiants />}
           {activeTab === "quiz" && <QuizManagement />}
           {activeTab === "resultats" && <Resultats />}
+          {activeTab === "forum" && <ForumEnseignant />}
           {activeTab === "profil" && <Profil />}
         </div>
       </div>
