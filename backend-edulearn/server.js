@@ -21,6 +21,13 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/stats', require('./src/routes/statsRoutes'));
 app.use('/api/profil', require('./src/routes/profileRoutes'));
 
+app.use('/api/admin', require('./src/routes/adminRoutes'));
+app.use('/api/evaluation', require('./src/routes/evaluationRoute'));
+
+app.use('/api/forum', require('./src/routes/forumRoute'));
+app.use('/api/inscription', require('./src/routes/inscriptionRoutes'));
+app.use('/api/quiz', require('./src/routes/quizRoute'));
+
 
 app.get('/', (req, res) => {
   res.json({ message: 'Backend éducatif opérationnel !' });

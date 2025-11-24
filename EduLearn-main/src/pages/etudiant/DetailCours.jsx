@@ -5,7 +5,7 @@ import MenuEtudiant from './MenuEtudiant';
 import './theme_etudiant.css';
 
 const DetailCours = () => {
-  const { id } = useParams();
+  const { id } = useParams(); // courseId
   const [cours, setCours] = useState(null);
   const [ressources, setRessources] = useState([]);
   const [forumMessages, setForumMessages] = useState([]);
@@ -13,28 +13,37 @@ const DetailCours = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulation données - À REMPLACER par appels API réels
-    setTimeout(() => {
-      setCours({
-        idCours: parseInt(id),
-        titre: `Cours ${id}`,
-        description: "Description du cours...",
-        nomUtilisateur: "Enseignant",
-        nomClasse: "Classe",
-        DateCours: "2025-01-01"
-      });
+    const fetchData = async () => {
+      try {
+        const token = localStorage.getItem("token");
 
-      setRessources([
-        { id: 1, nom: "Support PDF", type: "pdf" },
-        { id: 2, nom: "Exercices", type: "doc" }
-      ]);
+        // 1️⃣ Get course details
+        const coursRes = await fetch(`http://localhost:5000/api/cours/${id}`, {
+          headers: token ? { "Authorization": "Bearer " + token } : {}
+        });
+        const coursData = await coursRes.json();
+        setCours(coursData);
 
-      setForumMessages([
-        { id: 1, contenu: "Premier message", nomUtilisateur: "Étudiant", date: "2025-01-01" }
-      ]);
+        // 2️⃣ Get resources for this course
+        const resRes = await fetch(`http://localhost:5000/api/resources/${id}`, {
+          headers: token ? { "Authorization": "Bearer " + token } : {}
+        });
+        const resData = await resRes.json();
+        setRessources(resData);
 
-      setLoading(false);
-    }, 500);
+        // 3️⃣ Optionally, fetch forum messages (mocked for now)
+        setForumMessages([
+          { id: 1, contenu: "Premier message", nomUtilisateur: "Étudiant", date: "2025-01-01" }
+        ]);
+
+        setLoading(false);
+      } catch (err) {
+        console.error("Erreur lors du chargement du cours:", err);
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [id]);
 
   const handleSendMessage = (e) => {
@@ -44,7 +53,7 @@ const DetailCours = () => {
     const message = {
       id: forumMessages.length + 1,
       contenu: newMessage,
-      nomUtilisateur: "Vous", 
+      nomUtilisateur: "Vous",
       date: new Date().toLocaleDateString()
     };
 
@@ -53,7 +62,8 @@ const DetailCours = () => {
   };
 
   const handleDownload = (ressource) => {
-    alert(`Télécharger: ${ressource.nom}`);
+    // Open URL in a new tab
+    window.open(ressource.url, "_blank");
   };
 
   if (loading) {
@@ -62,11 +72,9 @@ const DetailCours = () => {
         <Navbar />
         <div className="dashboard">
           <MenuEtudiant />
-          <div className="content">
-            <div className="text-center py-5">
-              <div className="spinner-border text-primary" role="status">
-                <span className="visually-hidden">Chargement...</span>
-              </div>
+          <div className="content text-center py-5">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Chargement...</span>
             </div>
           </div>
         </div>
@@ -79,7 +87,6 @@ const DetailCours = () => {
       <Navbar />
       <div className="dashboard">
         <MenuEtudiant />
-        
         <div className="content">
           {/* Navigation */}
           <div className="mb-4">
@@ -88,7 +95,7 @@ const DetailCours = () => {
             </Link>
           </div>
 
-          {/* En-tête cours */}
+          {/* Cours details */}
           <div className="card-modern p-4 mb-4">
             <h1>{cours.titre}</h1>
             <p className="text-muted">{cours.description}</p>
@@ -98,27 +105,21 @@ const DetailCours = () => {
           </div>
 
           <div className="row">
-            {/* Section Ressources */}
+            {/* Resources */}
             <div className="col-lg-6">
               <div className="card-modern p-4 mb-4">
                 <h5>📚 Ressources</h5>
-                
                 {ressources.length > 0 ? (
                   <div className="mt-3">
-                    {ressources.map(ressource => (
-                      <div key={ressource.id} className="border rounded p-3 mb-2">
-                        <div className="d-flex justify-content-between align-items-center">
-                          <div>
-                            <strong>{ressource.nom}</strong>
-                            <div className="text-muted small">{ressource.type}</div>
-                          </div>
-                          <button 
-                            className="btn btn-primary btn-sm"
-                            onClick={() => handleDownload(ressource)}
-                          >
-                            Télécharger
-                          </button>
+                    {ressources.map(r => (
+                      <div key={r.id} className="border rounded p-3 mb-2 d-flex justify-content-between align-items-center">
+                        <div>
+                          <strong>{r.type}</strong> {/* or r.nom if you have it */}
+                          <div className="text-muted small">{r.titreCours || ''}</div>
                         </div>
+                        <button className="btn btn-primary btn-sm" onClick={() => handleDownload(r)}>
+                          Télécharger
+                        </button>
                       </div>
                     ))}
                   </div>
@@ -128,12 +129,10 @@ const DetailCours = () => {
               </div>
             </div>
 
-            {/* Section Forum */}
+            {/* Forum */}
             <div className="col-lg-6">
               <div className="card-modern p-4">
                 <h5>💬 Forum</h5>
-
-                {/* Formulaire message */}
                 <form onSubmit={handleSendMessage} className="mb-3">
                   <div className="input-group">
                     <input
@@ -149,22 +148,18 @@ const DetailCours = () => {
                   </div>
                 </form>
 
-                {/* Messages */}
                 <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                  {forumMessages.map(message => (
-                    <div key={message.id} className="border rounded p-3 mb-2">
+                  {forumMessages.map(msg => (
+                    <div key={msg.id} className="border rounded p-3 mb-2">
                       <div className="d-flex justify-content-between">
-                        <strong>{message.nomUtilisateur}</strong>
-                        <small className="text-muted">{message.date}</small>
+                        <strong>{msg.nomUtilisateur}</strong>
+                        <small className="text-muted">{msg.date}</small>
                       </div>
-                      <p className="mb-0 mt-2">{message.contenu}</p>
+                      <p className="mb-0 mt-2">{msg.contenu}</p>
                     </div>
                   ))}
+                  {forumMessages.length === 0 && <p className="text-muted text-center mt-3">Aucun message</p>}
                 </div>
-
-                {forumMessages.length === 0 && (
-                  <p className="text-muted text-center mt-3">Aucun message</p>
-                )}
               </div>
             </div>
           </div>

@@ -1,61 +1,57 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom'; // Import de Link
+import { Link } from 'react-router-dom';
 import Navbar from "../Navbar";
 import MenuEtudiant from './MenuEtudiant';
 import './theme_etudiant.css';
 
 const DashboardEtudiant = () => {
-  const [dashboardData, setDashboardData] = useState(null);
+  const [dashboardData, setDashboardData] = useState({ stats: {}, coursRecents: [] });
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    // Récupérer l'utilisateur connecté depuis le localStorage
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      const userData = JSON.parse(storedUser);
-      setUser(userData);
-    }
-
-    // Simulation appel API - À REMPLACER par vos endpoints réels
     const fetchDashboardData = async () => {
       try {
-        // Ici vous ferez l'appel API réel
-        setTimeout(() => {
-          setDashboardData({
-            stats: {
-              totalCours: 0,
-              examensDisponibles: 0,
-              quizDisponible: 0
-            },
-            coursRecents: [
-              { 
-                idCours: 3, 
-                titre: "Mathématiques Avancées", 
-                description: "Cours complet sur les concepts avancés",
-                DateCours: "2025-11-11",
-                nomClasse: "DS31"
-              },
-              { 
-                idCours: 4, 
-                titre: "Programmation Web", 
-                description: "Apprenez à créer des sites web modernes",
-                DateCours: "2026-02-01",
-                nomClasse: "DS31"
-              },
-              { 
-                idCours: 5, 
-                titre: "Histoire Moderne", 
-                description: "Étude des événements historiques",
-                DateCours: "2026-02-02",
-                nomClasse: "DS31"
-              }
-            ]
-          });
-          setLoading(false);
-        }, 500);
-      } catch (error) {
-        console.error("Erreur lors du chargement du dashboard:", error);
+        const token = localStorage.getItem("token");
+
+        
+        const profileRes = await fetch("http://localhost:5000/api/profil", {
+          headers: token ? { "Authorization": "Bearer " + token } : {}
+        });
+        if (!profileRes.ok) throw new Error("Erreur lors du chargement du profil");
+        const profile = await profileRes.json();
+        setUser(profile);
+
+        const coursesRes = await fetch("http://localhost:5000/api/inscription/mes-cours", {
+          headers: token ? { "Authorization": "Bearer " + token } : {}
+        });
+        if (!coursesRes.ok) throw new Error("Erreur lors du chargement des cours");
+        const courses = await coursesRes.json();
+
+        const examsRes = await fetch("http://localhost:5000/api/evaluation/student/evaluations" , {
+          headers: token ? { "Authorization": "Bearer " + token } : {}
+        });; 
+        const exams = examsRes.ok ? await examsRes.json() : [];
+        const quizRes = await fetch("http://localhost:5000/api/quiz/student/quizzes" , {
+          headers: token ? { "Authorization": "Bearer " + token } : {}
+        });; 
+        const quizzes = quizRes.ok ? await quizRes.json() : [];
+
+        const stats = {
+          totalCours: courses.length,
+          examensDisponibles: exams.length,
+          quizDisponible: quizzes.length
+        };
+
+        const recentCourses = courses
+          .sort((a, b) => new Date(b.DateCours) - new Date(a.DateCours))
+          .slice(0, 3);
+
+        setDashboardData({ stats, coursRecents: recentCourses });
+        setLoading(false);
+
+      } catch (err) {
+        console.error("Erreur lors du chargement du dashboard:", err);
         setLoading(false);
       }
     };
@@ -69,11 +65,9 @@ const DashboardEtudiant = () => {
         <Navbar />
         <div className="dashboard">
           <MenuEtudiant />
-          <div className="content">
-            <div className="text-center py-5">
-              <div className="spinner-border text-primary" role="status">
-                <span className="visually-hidden">Chargement...</span>
-              </div>
+          <div className="content text-center py-5">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Chargement...</span>
             </div>
           </div>
         </div>
@@ -86,23 +80,19 @@ const DashboardEtudiant = () => {
       <Navbar />
       <div className="dashboard">
         <MenuEtudiant />
-        
         <div className="content">
-          {/* En-tête avec nom de l'étudiant connecté */}
+          {/* User greeting */}
           <div className="mb-4">
             <h3>
               Bonjour,{" "}
-              <span className="text-primary">
-                {user ? `${user.prenom} ${user.nom}` : "Étudiant"}
-              </span> 
-              ! 👋
+              <span className="text-primary">{user ? `${user.prenom} ${user.nom}` : "Étudiant"}</span> ! 👋
             </h3>
             <p className="text-muted">
               {user ? `Bienvenue sur votre tableau de bord - ${user.email}` : "Connectez-vous pour voir vos données"}
             </p>
           </div>
 
-          {/* Statistiques générales */}
+          {/* Dashboard stats */}
           <div className="row g-3 mb-4">
             <div className="col-md-4">
               <div className="card-modern text-center p-3">
@@ -124,7 +114,7 @@ const DashboardEtudiant = () => {
             </div>
           </div>
 
-          {/* Cours récents */}
+          {/* Recent courses */}
           <div className="card-modern p-4">
             <h5 className="mb-4">Cours récents</h5>
             <div className="row g-3">
@@ -139,12 +129,7 @@ const DashboardEtudiant = () => {
                     <div className="small text-muted mb-3">
                       <strong>Date:</strong> {new Date(cours.DateCours).toLocaleDateString()}
                     </div>
-                    
-                    {/* LIEN VERS LA PAGE DÉTAIL DU COURS */}
-                    <Link 
-                      to={`/cours/${cours.idCours}`}
-                      className="btn btn-primary btn-sm w-100"
-                    >
+                    <Link to={`/cours/${cours.idCours}`} className="btn btn-primary btn-sm w-100">
                       📖 Voir le cours
                     </Link>
                   </div>
