@@ -14,26 +14,27 @@ import {
   FaVideo,
   FaImage,
 } from "react-icons/fa";
+import { courseService } from '../../services/courseService';
+import { resourceService } from '../../services/resourceService';
 import "./TeacherDashboard.css";
 
 export default function Cours() {
   const storedUser = localStorage.getItem('user');
   const user = storedUser ? JSON.parse(storedUser) : null;
-  const token = localStorage.getItem('token');
   const [notification, setNotification] = useState({ show: false, type: "", message: "" });
   const [courses, setCourses] = useState([]);
-  const [resources, setResources] = useState({}); // { courseId: [resources] }
-  const [pendingResources, setPendingResources] = useState([]); // Ressources en attente pour nouveau cours
+  const [resources, setResources] = useState({});
+  const [pendingResources, setPendingResources] = useState([]);
 
   const [activeTab, setActiveTab] = useState("listeCours");
   const [courseSearch, setCourseSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [newCourse, setNewCourse] = useState({
     id: null,
-    title: "",
+    titre: "",
     description: "",
     content: "",
-    date: "",
+    DateCours: "",
     file: null,
     fileName: "",
   });
@@ -44,52 +45,30 @@ export default function Cours() {
   });
 
   useEffect(() => {
-    fetchCourses();
+    if (user && user.idUtilisateur) {
+      fetchCourses();
+    }
   }, []);
 
-  const fetchCourses = () => {
-    fetch('http://localhost:5000/api/cours/')
-      .then(response => {
-        if (!response.ok) throw new Error('Erreur lors de la récupération des cours');
-        return response.json();
-      })
-      .then(data => {
-        const mappedCourses = data.map(c => ({
-          id: c.idCours,
-          title: c.titre,
-          description: c.description,
-          date: new Date(c.DateCours).toISOString().split('T')[0],
-          fileName: c.support || "—",
-          teacher: c.nomUtilisateur,
-          classe: c.nomClasse
-        }));
-        setCourses(mappedCourses);
-        setLoading(false);
-      })
-      .catch(error => {
-        console.error(error);
-        setLoading(false);
-      });
+  const fetchCourses = async () => {
+    try {
+      setLoading(true);
+      const coursesData = await courseService.getCoursByEnseignant(user.idUtilisateur);
+      setCourses(coursesData);
+    } catch (error) {
+      console.error('Erreur fetchCourses:', error);
+      showNotification("error", "Erreur lors du chargement des cours");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fetchResources = async (courseId) => {
     try {
-      console.log('🔍 Fetching resources for course:', courseId);
-      const response = await fetch(`http://localhost:5000/api/resources/${courseId}`, { // ✅ CORRIGÉ
-        headers: {
-          "Authorization": `Bearer ${token}`
-        }
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
-      console.log('✅ Resources fetched:', data);
-      setResources(prev => ({ ...prev, [courseId]: data }));
+      const resourcesData = await resourceService.getResourcesByCourse(courseId);
+      setResources(prev => ({ ...prev, [courseId]: resourcesData }));
     } catch (error) {
-      console.error('❌ Error fetching resources:', error);
+      console.error('Erreur fetchResources:', error);
       showNotification("error", "Erreur lors du chargement des ressources");
     }
   };
@@ -99,10 +78,10 @@ export default function Cours() {
     setTimeout(() => setNotification({ show: false, type: "", message: "" }), 4000);
   };
 
-  const handleEditCourse = (course) => { 
+  const handleEditCourse = async (course) => { 
     setNewCourse(course); 
     setActiveTab("modifierCours"); 
-    fetchResources(course.id);
+    await fetchResources(course.id);
   };
 
   const handleAddPendingResource = () => {
@@ -110,13 +89,11 @@ export default function Cours() {
       showNotification("error", "Veuillez saisir l'URL de la ressource");
       return;
     }
-
     const resource = {
-      id: Date.now(), // ID temporaire pour les ressources en attente
+      id: Date.now(),
       type: newResource.type,
       url: newResource.url
     };
-
     setPendingResources([...pendingResources, resource]);
     setNewResource({ type: "pdf", url: "" });
     showNotification("success", "Ressource ajoutée à la liste !");
@@ -132,29 +109,15 @@ export default function Cours() {
       showNotification("error", "Veuillez saisir l'URL de la ressource");
       return;
     }
-
     try {
-      const response = await fetch("http://localhost:5000/api/resources", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          courseId: courseId,
-          type: newResource.type,
-          url: newResource.url
-        })
+      await resourceService.addResource({
+        courseId: courseId,
+        type: newResource.type,
+        url: newResource.url
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Erreur lors de l'ajout de la ressource");
-      }
-
       showNotification("success", "Ressource ajoutée avec succès !");
       setNewResource({ type: "pdf", url: "" });
-      fetchResources(courseId);
+      await fetchResources(courseId);
     } catch (error) {
       console.error(error);
       showNotification("error", error.message);
@@ -163,22 +126,10 @@ export default function Cours() {
 
   const handleDeleteResource = async (resourceId, courseId) => {
     if (!window.confirm("Supprimer cette ressource ?")) return;
-
     try {
-      const response = await fetch(`http://localhost:5000/api/resources/${resourceId}`, {
-        method: "DELETE",
-        headers: {
-          "Authorization": `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Erreur lors de la suppression");
-      }
-
+      await resourceService.deleteResource(resourceId);
       showNotification("success", "Ressource supprimée avec succès !");
-      fetchResources(courseId);
+      await fetchResources(courseId);
     } catch (error) {
       console.error(error);
       showNotification("error", error.message);
@@ -187,156 +138,83 @@ export default function Cours() {
 
   const handleCourseSubmit = async (e) => {
     e.preventDefault();
-
-    if (!newCourse.title || !newCourse.description || !newCourse.date) {
+    if (!newCourse.titre || !newCourse.description || !newCourse.DateCours) {
       showNotification("error", "Veuillez remplir tous les champs obligatoires !");
       return;
     }
-
     try {
-      const dataLogin = {
-        titre: newCourse.title,
+      const courseData = {
+        titre: newCourse.titre,
         description: newCourse.description,
-        support: "fichier1",
-        DateCours: newCourse.date,
-        idClasse: 1,
+        DateCours: newCourse.DateCours,
         idUtilisateur: user.idUtilisateur
       };
-      
-      const response = await fetch("http://localhost:5000/api/cours/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
-        body: JSON.stringify(dataLogin),
-      });
+      const createdCourse = await courseService.createCourse(courseData);
+      const courseId = createdCourse.idCours || createdCourse.insertId;
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        showNotification("error", data.message || "Erreur lors de l'ajout du cours !");
-        return;
-      }
-
-      const courseId = data.idCours || courses.length + 1;
-
-      // Ajouter les ressources en attente après la création du cours
       if (pendingResources.length > 0) {
-        for (const resource of pendingResources) {
-          await fetch("http://localhost:5000/api/resources", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${token}`
-            },
-            body: JSON.stringify({
-              courseId: courseId,
-              type: resource.type,
-              url: resource.url
-            })
-          });
-        }
+        const resourcePromises = pendingResources.map(resource =>
+          resourceService.addResource({
+            courseId: courseId,
+            type: resource.type,
+            url: resource.url
+          })
+        );
+        await Promise.all(resourcePromises);
       }
-
-      const newCourseObj = {
-        ...newCourse,
-        id: courseId,
-        fileName: newCourse.file ? newCourse.file.name : "",
-      };
-
-      setCourses([...courses, newCourseObj]);
+      await fetchCourses();
       showNotification("success", `Cours ajouté avec succès ! ${pendingResources.length > 0 ? `Et ${pendingResources.length} ressource(s) ajoutée(s).` : ''}`);
       resetForm();
       setActiveTab("listeCours");
     } catch (error) {
       console.error("Erreur:", error.message);
-      showNotification("error", "Erreur réseau ou serveur !");
+      showNotification("error", error.message || "Erreur réseau ou serveur !");
     }
   };
 
   const handleUpdateCourse = async (e) => {
     e.preventDefault();
-
-    if (!newCourse.title || !newCourse.description || !newCourse.date) {
+    if (!newCourse.titre || !newCourse.description || !newCourse.DateCours) {
       showNotification("error", "Veuillez remplir tous les champs obligatoires !");
       return;
     }
-
     try {
       const updatedData = {
-        titre: newCourse.title,
+        titre: newCourse.titre,
         description: newCourse.description,
-        support: "fichier",
-        DateCours: newCourse.date,
-        idClasse: 1,
+        DateCours: newCourse.DateCours,
         idUtilisateur: user.idUtilisateur
       };
-
-      const response = await fetch(`http://localhost:5000/api/cours/${newCourse.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify(updatedData)
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        showNotification("error", data.message || "Erreur lors de la mise à jour du cours !");
-        return;
-      }
-
-      const updatedCourses = courses.map((c) =>
-        c.id === newCourse.id
-          ? { ...newCourse, fileName: newCourse.file ? newCourse.file.name : c.fileName }
-          : c
-      );
-
-      setCourses(updatedCourses);
+      await courseService.updateCourse(newCourse.id, updatedData);
+      await fetchCourses();
       showNotification("success", "Cours modifié avec succès !");
       resetForm();
       setActiveTab("listeCours");
     } catch (error) {
       console.error("Erreur:", error.message);
-      showNotification("error", "Erreur réseau ou serveur !");
+      showNotification("error", error.message || "Erreur réseau ou serveur !");
     }
   };
 
-  const handleDeleteCourse = async (id, title) => {
-    if (!window.confirm(`Supprimer le cours "${title}" ?`)) return;
-
+  const handleDeleteCourse = async (id, titre) => {
+    if (!window.confirm(`Supprimer le cours "${titre}" ?`)) return;
     try {
-      const response = await fetch(`http://localhost:5000/api/cours/${id}`, {
-        method: "DELETE",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        showNotification("error", errorData.message || "Erreur lors de la suppression du cours !");
-        return;
-      }
-
+      await courseService.deleteCourse(id);
       setCourses(courses.filter((c) => c.id !== id));
       showNotification("success", "Cours supprimé avec succès !");
     } catch (error) {
       console.error("Erreur:", error.message);
-      showNotification("error", "Erreur réseau ou serveur !");
+      showNotification("error", error.message || "Erreur réseau ou serveur !");
     }
   };
 
   const resetForm = () => {
     setNewCourse({
       id: null,
-      title: "",
+      titre: "",
       description: "",
       content: "",
-      date: "",
+      DateCours: "",
       file: null,
       fileName: "",
     });
@@ -353,8 +231,9 @@ export default function Cours() {
     }
   };
 
-  const filteredCourses = courses.filter((course) =>
-    course.title.toLowerCase().includes(courseSearch.toLowerCase())
+  const filteredCourses = courses.filter(
+    (course) =>
+      course.titre && course.titre.toLowerCase().includes(courseSearch.toLowerCase())
   );
 
   if (loading) return <p>Chargement des cours...</p>;
@@ -382,7 +261,7 @@ export default function Cours() {
         <>
           <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap">
             <h3>
-              <FaBookOpen className="me-2 text-primary" /> Gestion des cours
+              <FaBookOpen className="me-2 text-primary" /> Mes cours
             </h3>
             <button
               className="btn"
@@ -396,9 +275,7 @@ export default function Cours() {
           <div className="row mb-3">
             <div className="col-md-6">
               <div className="input-group">
-                <span className="input-group-text">
-                  <FaSearch />
-                </span>
+                <span className="input-group-text"><FaSearch /></span>
                 <input
                   type="text"
                   className="form-control"
@@ -417,6 +294,7 @@ export default function Cours() {
                   <th>Titre</th>
                   <th>Description</th>
                   <th>Date</th>
+                  <th>Classe</th>
                   <th>Ressources</th>
                   <th>Actions</th>
                 </tr>
@@ -424,27 +302,40 @@ export default function Cours() {
               <tbody>
                 {filteredCourses.length > 0 ? (
                   filteredCourses.map((c) => (
-                    <tr key={c.id}>
-                      <td>{c.title}</td>
+                    <tr key={c.idCours || c.id}>
+                      <td>{c.titre}</td>
                       <td>{c.description}</td>
-                      <td>{c.date}</td>
+                      <td>{c.DateCours ? new Date(c.DateCours).toLocaleDateString('fr-FR') : ''}</td>
                       <td>
-                        {resources[c.id] && resources[c.id].length > 0 ? (
+                        <span className="badge bg-secondary">
+                          {c.nomClasse || 'Non assigné'}
+                        </span>
+                      </td>
+                      <td>
+                        {resources[c.idCours || c.id] && resources[c.idCours || c.id].length > 0 ? (
                           <span className="badge bg-primary">
-                            {resources[c.id].length} ressource(s)
+                            {resources[c.idCours || c.id].length} ressource(s)
                           </span>
                         ) : (
                           <span className="text-muted">Aucune ressource</span>
                         )}
                       </td>
                       <td>
-                        <button className="btn btn-primary btn-sm me-2" onClick={() => handleEditCourse(c)}>
+                        <button 
+                          className="btn btn-primary btn-sm me-2" 
+                          onClick={() => handleEditCourse({
+                            id: c.idCours || c.id,
+                            titre: c.titre,
+                            description: c.description,
+                            DateCours: c.DateCours
+                          })}
+                        >
                           <FaEdit />
                         </button>
                         <button
                           className="btn btn-sm"
                           style={{ backgroundColor: "#ff8800", color: "#fff" }}
-                          onClick={() => handleDeleteCourse(c.id, c.title)}
+                          onClick={() => handleDeleteCourse(c.idCours || c.id, c.titre)}
                         >
                           <FaTrash />
                         </button>
@@ -453,8 +344,11 @@ export default function Cours() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="5" className="text-center text-muted py-4">
-                      Aucun cours trouvé
+                    <td colSpan="6" className="text-center text-muted py-4">
+                      {courses.length === 0 
+                        ? "Aucun cours créé pour le moment" 
+                        : "Aucun cours trouvé avec ce critère de recherche"
+                      }
                     </td>
                   </tr>
                 )}
@@ -468,15 +362,14 @@ export default function Cours() {
         <div className="card-modern p-4 mt-4">
           <h4>{activeTab === "modifierCours" ? "Modifier le cours" : "Créer un nouveau cours"}</h4>
           <form onSubmit={activeTab === "modifierCours" ? handleUpdateCourse : handleCourseSubmit}>
-
             <div className="row mb-3 align-items-center">
               <label className="col-sm-2 col-form-label">Titre *</label>
               <div className="col-sm-10">
                 <input
                   type="text"
                   className="form-control"
-                  value={newCourse.title}
-                  onChange={(e) => setNewCourse({ ...newCourse, title: e.target.value })}
+                  value={newCourse.titre}
+                  onChange={(e) => setNewCourse({ ...newCourse, titre: e.target.value })}
                   required
                 />
               </div>
@@ -514,14 +407,14 @@ export default function Cours() {
                 <input
                   type="date"
                   className="form-control"
-                  value={newCourse.date}
-                  onChange={(e) => setNewCourse({ ...newCourse, date: e.target.value })}
+                  value={newCourse.DateCours ? newCourse.DateCours.split('T')[0] : ""}
+                  onChange={(e) => setNewCourse({ ...newCourse, DateCours: e.target.value })}
                   required
                 />
               </div>
             </div>
 
-            {/* Section Gestion des Ressources (disponible dans les deux formulaires) */}
+            {/* Gestion des ressources */}
             <div className="row mb-4">
               <div className="col-12">
                 <div className="border rounded p-3 bg-light">
@@ -529,8 +422,6 @@ export default function Cours() {
                     <FaLink className="me-2" />
                     {activeTab === "ajouterCours" ? "Ajouter des ressources au cours" : "Gestion des ressources du cours"}
                   </h6>
-                  
-                  {/* Formulaire d'ajout de ressource */}
                   <div className="row g-2 mb-3">
                     <div className="col-md-3">
                       <select
@@ -541,7 +432,6 @@ export default function Cours() {
                         <option value="pdf">PDF</option>
                         <option value="video">Vidéo</option>
                         <option value="image">Image</option>
-                        <option value="lien">Lien</option>
                       </select>
                     </div>
                     <div className="col-md-6">
@@ -564,9 +454,7 @@ export default function Cours() {
                     </div>
                   </div>
 
-                  {/* Liste des ressources */}
                   {activeTab === "ajouterCours" ? (
-                    // Ressources en attente pour nouveau cours
                     pendingResources.length > 0 ? (
                       <div className="mt-3">
                         <small className="text-muted d-block mb-2">Ressources à ajouter :</small>
@@ -589,12 +477,9 @@ export default function Cours() {
                         ))}
                       </div>
                     ) : (
-                      <div className="text-center text-muted py-3">
-                        Aucune ressource ajoutée pour le moment
-                      </div>
+                      <div className="text-center text-muted py-3">Aucune ressource ajoutée pour le moment</div>
                     )
                   ) : (
-                    // Ressources existantes pour cours en modification
                     resources[newCourse.id] && resources[newCourse.id].length > 0 ? (
                       <div className="mt-3">
                         <small className="text-muted d-block mb-2">Ressources existantes :</small>
@@ -617,9 +502,7 @@ export default function Cours() {
                         ))}
                       </div>
                     ) : (
-                      <div className="text-center text-muted py-3">
-                        Aucune ressource ajoutée pour ce cours
-                      </div>
+                      <div className="text-center text-muted py-3">Aucune ressource ajoutée pour ce cours</div>
                     )
                   )}
                 </div>
@@ -631,10 +514,7 @@ export default function Cours() {
                 type="button"
                 className="btn"
                 style={{ backgroundColor: "#ff8800", color: "#fff" }}
-                onClick={() => {
-                  resetForm();
-                  setActiveTab("listeCours");
-                }}
+                onClick={() => { resetForm(); setActiveTab("listeCours"); }}
               >
                 ← Retour
               </button>

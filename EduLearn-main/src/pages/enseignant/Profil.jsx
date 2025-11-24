@@ -8,13 +8,14 @@ export default function Profil() {
     surname: "",
     email: "",
     phone: "",
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
+    currentPassword: "", // Ancien mot de passe
+    newPassword: "",     // Nouveau mot de passe
+    confirmPassword: "", // Confirmation
   });
 
   const [message, setMessage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isPasswordLoading, setIsPasswordLoading] = useState(false);
 
   // ================================
   // 🔹 Notification simple
@@ -37,20 +38,26 @@ export default function Profil() {
         Authorization: `Bearer ${token}`,
       },
     })
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Erreur lors du chargement du profil");
+        }
+        return res.json();
+      })
       .then((data) => {
         setTeacher({
           name: data.nom || "",
           surname: data.prenom || "",
           email: data.email || "",
-          phone: data.phone || "",
+          phone: data.telephone || data.phone || "", // Adapté selon votre BD
           currentPassword: "",
           newPassword: "",
           confirmPassword: "",
         });
       })
-      .catch(() => {
-        showNotification("error", "Erreur lors du chargement du profil...");
+      .catch((error) => {
+        console.error("Erreur:", error);
+        showNotification("error", "Erreur lors du chargement du profil");
       });
   }, []);
 
@@ -65,7 +72,7 @@ export default function Profil() {
       nom: teacher.name,
       prenom: teacher.surname,
       email: teacher.email,
-      phone: teacher.phone,
+      telephone: teacher.phone, // Adapté selon votre BD
     };
 
     const token = localStorage.getItem("token");
@@ -80,30 +87,28 @@ export default function Profil() {
         body: JSON.stringify(updatedData),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
         showNotification("success", "Profil mis à jour avec succès !");
-        setTeacher({
-          ...teacher,
-          currentPassword: "",
-          newPassword: "",
-          confirmPassword: "",
-        });
       } else {
-        showNotification("error", "Erreur lors de la mise à jour du profil...");
+        showNotification("error", data.message || "Erreur lors de la mise à jour du profil");
       }
     } catch (error) {
-      showNotification("error", "Erreur réseau lors de la mise à jour du profil...");
+      console.error("Erreur:", error);
+      showNotification("error", "Erreur réseau lors de la mise à jour du profil");
     } finally {
       setIsLoading(false);
     }
   };
 
   // ================================
-  // 🔹 Changer le mot de passe
+  // 🔹 Changer le mot de passe - CORRIGÉ
   // ================================
   const handlePasswordChange = async (e) => {
     e.preventDefault();
 
+    // Validations
     if (!teacher.currentPassword) {
       showNotification("error", "Veuillez saisir votre mot de passe actuel.");
       return;
@@ -124,11 +129,12 @@ export default function Profil() {
       return;
     }
 
-    setIsLoading(true);
+    setIsPasswordLoading(true);
 
+    // ✅ CORRECTION : Utiliser les noms attendus par le backend
     const passwordData = {
-      currentPassword: teacher.currentPassword,
-      newPassword: teacher.newPassword,
+      oldPassword: teacher.currentPassword, // "currentPassword" devient "oldPassword"
+      newPassword: teacher.newPassword      // Même nom
     };
 
     const token = localStorage.getItem("token");
@@ -147,6 +153,7 @@ export default function Profil() {
 
       if (response.ok) {
         showNotification("success", "Mot de passe changé avec succès !");
+        // Réinitialiser les champs mot de passe
         setTeacher({
           ...teacher,
           currentPassword: "",
@@ -157,9 +164,10 @@ export default function Profil() {
         showNotification("error", data.message || "Erreur lors du changement de mot de passe.");
       }
     } catch (error) {
-      showNotification("error", "Erreur réseau lors du changement de mot de passe...");
+      console.error("Erreur:", error);
+      showNotification("error", "Erreur réseau lors du changement de mot de passe");
     } finally {
-      setIsLoading(false);
+      setIsPasswordLoading(false);
     }
   };
 
@@ -232,6 +240,18 @@ export default function Profil() {
                       />
                     </div>
 
+                    <div className="mb-4">
+                      <label className="form-label fw-semibold text-dark fs-6">Email</label>
+                      <input
+                        type="email"
+                        className="form-control border-1 rounded-3 py-3 px-4 fs-6"
+                        value={teacher.email}
+                        onChange={(e) => setTeacher({ ...teacher, email: e.target.value })}
+                        required
+                        style={{ borderColor: '#e2e8f0' }}
+                      />
+                    </div>
+
                     <div className="mb-5">
                       <label className="form-label fw-semibold text-dark fs-6">Téléphone</label>
                       <input
@@ -274,7 +294,10 @@ export default function Profil() {
                   
                   <form onSubmit={handlePasswordChange}>
                     <div className="mb-4">
-                      <label className="form-label fw-semibold text-dark fs-6">Mot de passe actuel</label>
+                      <label className="form-label fw-semibold text-dark fs-6">
+                        Mot de passe actuel
+                        <span className="text-danger">*</span>
+                      </label>
                       <input
                         type="password"
                         className="form-control border-1 rounded-3 py-3 px-4 fs-6"
@@ -287,7 +310,10 @@ export default function Profil() {
                     </div>
 
                     <div className="mb-4">
-                      <label className="form-label fw-semibold text-dark fs-6">Nouveau mot de passe</label>
+                      <label className="form-label fw-semibold text-dark fs-6">
+                        Nouveau mot de passe
+                        <span className="text-danger">*</span>
+                      </label>
                       <input
                         type="password"
                         className="form-control border-1 rounded-3 py-3 px-4 fs-6"
@@ -301,7 +327,10 @@ export default function Profil() {
                     </div>
 
                     <div className="mb-5">
-                      <label className="form-label fw-semibold text-dark fs-6">Confirmer le mot de passe</label>
+                      <label className="form-label fw-semibold text-dark fs-6">
+                        Confirmer le mot de passe
+                        <span className="text-danger">*</span>
+                      </label>
                       <input
                         type="password"
                         className="form-control border-1 rounded-3 py-3 px-4 fs-6"
@@ -316,9 +345,9 @@ export default function Profil() {
                     <button 
                       className="btn btn-primary w-100 py-3 rounded-3 fw-semibold fs-6"
                       type="submit"
-                      disabled={isLoading}
+                      disabled={isPasswordLoading}
                     >
-                      {isLoading ? (
+                      {isPasswordLoading ? (
                         <>
                           <span className="spinner-border spinner-border-sm me-2" role="status"></span>
                           Modification...

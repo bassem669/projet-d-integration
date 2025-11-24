@@ -2,7 +2,8 @@
 const express = require('express');
 const router = express.Router();
 const evaluationController = require('../controllers/evaluationController');
-const auth = require('../middleware/auth');
+const auth = require('../middleware/authMiddleware');
+
 
 // ==================== ROUTES ÉTUDIANT ====================
 router.get('/student/evaluations', auth, evaluationController.getEvaluationsForStudent);

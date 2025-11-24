@@ -1,4 +1,4 @@
-const connection = require('./db');
+const connection = require('./../config/db');
 
 // Créer un nouveau message dans le forum
 exports.createMessage = (req, res) => {

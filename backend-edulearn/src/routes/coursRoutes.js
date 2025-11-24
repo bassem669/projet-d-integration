@@ -15,22 +15,23 @@ router.post(
   '/', 
   auth, 
   roleMiddleware(['enseignant', 'admin']), 
-  upload.single('support'), 
   coursController.createCours
 );
+
+router.get('/enseignant/:idEnseignant/etudiant', coursController.getEtudiantsByEnseignant);
+
 
 router.put(
   '/:id', 
   auth, 
   roleMiddleware(['enseignant', 'admin']), 
-  upload.single('support'), 
   coursController.updateCours
 );
 
 router.delete(
   '/:id', 
   auth, 
-  roleMiddleware(['admin']), 
+  roleMiddleware(['enseignant']), 
   coursController.deleteCours
 );
 

@@ -36,36 +36,105 @@ exports.getCoursByEnseignant = (req, res) => {
         return res.status(500).json({ message: "Erreur serveur" });
       }
 
-      if (results.length === 0) {
-        return res.status(404).json({ message: "Aucun cours trouvé pour cet enseignant" });
-      }
-
       res.json(results);
     }
   );
 };
 
+// routes/etudiants.js ou routes/enseignants.js
+
+exports.getEtudiantsByEnseignant = (req, res) => {
+  const { idEnseignant } = req.params;
+
+  const query = `
+    SELECT DISTINCT
+        e.idUtilisateur AS idEtudiant,
+        e.nom,
+        e.prenom,
+        e.email,
+        e.phone AS telephone,
+        c.idCours,
+        c.titre AS nomCours,
+        ens.nom AS nomEnseignant,
+        ens.prenom AS prenomEnseignant
+    FROM Utilisateur e
+    INNER JOIN Inscription i ON e.idUtilisateur = i.idEtudiant
+    INNER JOIN Cours c ON i.idCours = c.idCours
+    INNER JOIN Utilisateur ens ON c.idUtilisateur = ens.idUtilisateur
+    WHERE c.idUtilisateur = ? 
+    ORDER BY e.nom, e.prenom, c.titre;
+      `;
+
+  connection.query(query, [idEnseignant], (err, results) => {
+    if (err) {
+      console.error("Erreur lors de la récupération des étudiants:", err);
+      return res.status(500).json({ 
+        message: "Erreur serveur lors de la récupération des étudiants",
+        error: err.message 
+      });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ 
+        message: "Aucun étudiant trouvé pour les cours de cet enseignant"  
+      });
+    }
+
+    // Structurer les données par étudiant avec leurs cours
+    const etudiantsStructures = {};
+
+    results.forEach(row => {
+      const etudiantId = row.idEtudiant;
+      
+      if (!etudiantsStructures[etudiantId]) {
+        etudiantsStructures[etudiantId] = {
+          idEtudiant: row.idEtudiant,
+          nom: row.nom,
+          prenom: row.prenom,
+          email: row.email,
+          telephone: row.telephone,
+          enseignant: `${row.prenomEnseignant} ${row.nomEnseignant}`,
+          cours: []
+        };
+      }
+
+      etudiantsStructures[etudiantId].cours.push({
+        idCours: row.idCours,
+        nomCours: row.nomCours
+      });
+    });
+
+    const etudiants = Object.values(etudiantsStructures);
+
+    res.json({
+      success: true,
+      count: etudiants.length,
+      enseignant: results[0] ? `${results[0].prenomEnseignant} ${results[0].nomEnseignant}` : '',
+      etudiants: etudiants
+    });
+  });
+};
+
+
 exports.createCours = (req, res) => {
   const { titre, description, DateCours, idClasse, idUtilisateur } = req.body;
 
-  const support = req.file ? req.file.filename : null;
-
-  if (!titre || !idUtilisateur) {
-    return res.status(400).json({ message: 'Titre et idUtilisateur sont requis' });
-  }
-
   connection.query(
-    'INSERT INTO Cours (titre, description, support, DateCours, idClasse, idUtilisateur) VALUES (?, ?, ?, ?, ?, ?)',
-    [titre, description, support, DateCours, idClasse, idUtilisateur],
+    'INSERT INTO Cours (titre, description, DateCours, idClasse, idUtilisateur) VALUES (?, ?, ?, ?, ?)',
+    [titre, description, DateCours, idClasse, idUtilisateur],
     (err, result) => {
       if (err) {
         console.error('Erreur SQL:', err);
         return res.status(500).json({ message: 'Erreur lors de l’ajout du cours' });
       }
-      res.status(201).json({ message: 'Cours ajouté avec succès', id: result.insertId });
+      res.status(201).json({ 
+        message: 'Cours ajouté avec succès',
+        idCours: result.insertId     // 👍 important pour le frontend
+      });
     }
   );
 };
+
 
 
 exports.getCoursById = (req, res) => {
@@ -92,52 +161,26 @@ exports.updateCours = (req, res) => {
   const { id } = req.params;
   const { titre, description, DateCours, idClasse } = req.body;
 
-  // Nouveau fichier uploadé ?
-  const newSupport = req.file ? req.file.filename : null;
-
   // récupérer l'ancien support dans la base
-  connection.query(
-    'SELECT support FROM Cours WHERE idCours = ?',
-    [id],
-    (err, data) => {
-      if (err) return res.status(500).json({ message: 'Erreur interne' });
-
-      if (data.length === 0)
-        return res.status(404).json({ message: 'Cours non trouvé' });
-
-      const oldSupport = data[0].support;
-
-      // si un nouveau fichier est uploadé → supprimer l'ancien
-      if (newSupport && oldSupport) {
-        const oldFilePath = path.join(__dirname, '..', 'uploads', oldSupport);
-
-        fs.unlink(oldFilePath, (err) => {
-          if (err) console.log("⚠️ Impossible de supprimer l'ancien fichier :", err);
-        });
-      }
-
-      // support final à sauvegarder
-      const finalSupport = newSupport ? newSupport : oldSupport;
-
       // mise à jour en DB
-      connection.query(
-        'UPDATE Cours SET titre=?, description=?, support=?, DateCours=?, idClasse=? WHERE idCours=?',
-        [titre, description, finalSupport, DateCours, idClasse, id],
-        (errUpdate) => {
-          if (errUpdate)
-            return res.status(500).json({ message: 'Erreur lors de la mise à jour' });
+  connection.query(
+    'UPDATE Cours SET titre=?, description=?, DateCours=?, idClasse=? WHERE idCours=?',
+    [titre, description, DateCours, idClasse, id],
+    (errUpdate) => {
+      if (errUpdate)
+        return res.status(500).json({ message: 'Erreur lors de la mise à jour' });
 
-          res.json({ message: 'Cours mis à jour avec succès', support: finalSupport });
-        }
-      );
+      res.json({ message: 'Cours mis à jour avec succès' });
     }
   );
+
+
 };
 
 
 exports.deleteCours = (req, res) => {
-  const { id } = req.params;
-  connection.query('DELETE FROM Cours WHERE idCours = ?', [id], (err) => {
+  const { courseId } = req.params;
+  connection.query('DELETE FROM Cours WHERE idCours = ?', [courseId], (err) => {
     if (err) return res.status(500).json({ message: 'Erreur lors de la suppression' });
     res.json({ message: 'Cours supprimé avec succès' });
   });
