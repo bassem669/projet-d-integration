@@ -1,19 +1,27 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FaComments, FaPaperPlane, FaSpinner, FaUserAlt } from "react-icons/fa";
 import "./TeacherDashboard.css";
+import { getAuthHeaders } from "../../services/apiConfig";
 
 export default function ForumEnseignant() {
+  // Récupérer l'utilisateur stocké
   const storedUser = localStorage.getItem("user");
   const user = storedUser ? JSON.parse(storedUser) : null;
 
   const forumService = {
     async getAllMessages() {
-      return axios.get("http://localhost:5000/forum/messages");
+      return axios.get("http://localhost:5000/api/forum/messages", {
+        headers: getAuthHeaders() // simple auth header
+      });
     },
-    async createMessage(contenu, idUtilisateur) {
-      return axios.post("http://localhost:5000/forum/messages", { contenu, idUtilisateur });
+    async createMessage(contenu) {
+      return axios.post(
+        "http://localhost:5000/api/forum/messages",
+        { contenu, idUtilisateur: user.idUtilisateur },
+        { headers: getAuthHeaders() }
+      );
     },
   };
 
@@ -22,9 +30,19 @@ export default function ForumEnseignant() {
   const [newMessage, setNewMessage] = useState("");
   const [error, setError] = useState("");
 
+  const messagesEndRef = useRef(null);
+
   useEffect(() => {
+    if (!user) return;
     fetchMessages();
   }, []);
+
+  // Scroll automatique vers le bas
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
 
   const fetchMessages = async () => {
     try {
@@ -45,13 +63,23 @@ export default function ForumEnseignant() {
     if (!newMessage.trim()) return;
 
     try {
-      await forumService.createMessage(newMessage, user.idUtilisateur);
+      await forumService.createMessage(newMessage);
       setNewMessage("");
       fetchMessages();
     } catch (err) {
       setError("Impossible d'envoyer le message");
     }
   };
+
+  if (!user) {
+    return (
+      <div className="content px-4 py-5 text-center">
+        <p className="text-danger fs-5">
+          Vous devez être connecté pour accéder au forum.
+        </p>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -82,7 +110,10 @@ export default function ForumEnseignant() {
         >
           {messages.length === 0 ? (
             <div className="text-center py-5">
-              <div className="d-inline-flex align-items-center justify-content-center bg-light rounded-circle mb-3" style={{ width: "80px", height: "80px" }}>
+              <div
+                className="d-inline-flex align-items-center justify-content-center bg-light rounded-circle mb-3"
+                style={{ width: "80px", height: "80px" }}
+              >
                 <FaComments size="2.5em" className="text-primary" />
               </div>
               <p className="text-muted fs-5">Aucune question pour le moment</p>
@@ -100,12 +131,15 @@ export default function ForumEnseignant() {
                 <div className="d-flex align-items-center mb-2">
                   <FaUserAlt className="text-primary me-2" />
                   <strong>{msg.nom} {msg.prenom}</strong>
-                  <span className="ms-auto text-muted small">{new Date(msg.created_at).toLocaleString()}</span>
+                  <span className="ms-auto text-muted small">
+                    {msg.created_at ? new Date(msg.created_at).toLocaleString() : ""}
+                  </span>
                 </div>
                 <p className="mb-0">{msg.contenu}</p>
               </div>
             ))
           )}
+          <div ref={messagesEndRef}></div>
         </div>
       </div>
 

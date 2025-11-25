@@ -48,18 +48,23 @@ const login = (req, res) => {
         return res.status(404).json({ message: 'Utilisateur introuvable' });
 
       const user = results[0];
+
+      // Vérification du statut de l'utilisateur
+      if (user.statut === 'suspendu') {
+        return res.status(403).json({ message: 'Compte suspendu, contactez l’administrateur' });
+      }
+
       const isMatch = await bcrypt.compare(motDePasse, user.motDePasse);
 
       if (!isMatch) return res.status(400).json({ message: 'Mot de passe incorrect' });
 
-      // on inclut le rôle dans le JWT
+      // Génération du JWT avec rôle
       const token = jwt.sign(
         { id: user.idUtilisateur, role: user.role },
         process.env.JWT_SECRET,
         { expiresIn: '7d' }
       );
 
-      //  Renvoi du rôle pour le frontend + middleware RBAC
       res.json({
         message: 'Connexion réussie',
         token,
@@ -74,6 +79,7 @@ const login = (req, res) => {
     }
   );
 };
+
 
 const réinitialisationMotDePass = (req, res) => {
   const { email } = req.body;

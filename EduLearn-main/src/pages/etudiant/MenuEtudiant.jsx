@@ -5,7 +5,8 @@ import {
   FaBookOpen,
   FaChartBar,
   FaUserCircle,
-  FaQuestionCircle
+  FaQuestionCircle,
+  FaComments
 } from "react-icons/fa";
 
 export default function MenuEtudiant() {
@@ -14,8 +15,10 @@ export default function MenuEtudiant() {
   const menuItems = [
     { id: "dashboard", path: "/dashboard", label: "Tableau de bord", icon: FaHome },
     { id: "cours", path: "/cours", label: "Mes cours", icon: FaBookOpen },
+    { id: "forum", path: "/forum", label: "Forums", icon: FaComments },
     { id: "quiz", path: "/quiz", label: "Quiz & Évaluations", icon: FaQuestionCircle },
     { id: "profil", path: "/profil", label: "Mon profil", icon: FaUserCircle }
+
   ];
 
   return (

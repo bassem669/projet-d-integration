@@ -1,0 +1,353 @@
+/* Styles globaux */
+body { 
+    font-family: "Poppins", sans-serif;
+    font-size: 1.1rem;
+    background-color: #f0f2f5;
+    color: #333;
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* Dashboard layout */
+  .dashboard {
+    min-height: 100vh;
+    display: flex;
+  }
+  
+  /* Sidebar */
+  .sidebar {
+    width: 290px;
+    background-color: #2a4d7b;
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 2rem 1rem;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .dashboard-logo {
+    display: flex;
+    flex-direction: column; /* logo au-dessus du texte */
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 2rem;
+  }
+  
+  .dashboard-logo img {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    /* fond transparent donc pas de background blanc */
+  }
+  
+  .dashboard-logo span {
+    color: #fff;
+    font-weight: bold;
+    font-size: 2rem;
+    white-space: nowrap;
+  }
+  
+  /* Items de la sidebar */
+  .sidebar-item {
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+  
+  .sidebar-item:hover {
+    background-color: #2c5282;
+  }
+  
+  
+  .sidebar-item svg {
+    font-size: 1.4rem;
+    margin-right: 10px;
+  }
+  
+  /* Main content */
+  .content {
+    flex-grow: 1;
+    padding: 2.5rem 3rem;
+    background-color: #f0f2f5;
+  }
+  
+  
+  .content h3, .content h4 {
+    font-weight: 700;
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  /* Cards */
+  .card-modern {
+    border-radius: 15px;
+    background-color: #fff;
+    padding: 2rem;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    text-align: center;
+    transition: transform 0.2s;
+  }
+  
+  .card-modern:hover {
+    transform: translateY(-5px);
+  }
+  
+  .card-modern h3 {
+    font-size: 2rem;
+    margin-top: 0.5rem;
+  }
+  
+  /* Tables */
+  .table-modern {
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #fff;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+  }
+  
+  .table-modern th,
+  .table-modern td {
+    padding: 1rem;
+    font-size: 1.1rem;
+  }
+  
+  .table-modern tbody tr:hover {
+    background-color: #e0e7ff;
+  }
+  
+  .table-modern thead {
+    background-color: #1e3a8a;
+    color: #fff;
+  }
+  
+  .table-modern .badge {
+    font-size: 0.9rem;
+    padding: 0.3rem 0.6rem;
+  }
+  
+  /* Buttons */
+  .btn {
+    border-radius: 10px;
+    font-size: 1.1rem;
+    padding: 0.6rem 1.2rem;
+    transition: all 0.3s;
+  }
+  
+  .btn:hover {
+    opacity: 0.9;
+  }
+  
+  /* Form inputs */
+  .form-control, .form-select {
+    border-radius: 10px;
+    padding: 0.6rem 1rem;
+    font-size: 1.1rem;
+  }
+  
+  .form-horizontal .form-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.2rem;
+  }
+  
+  .form-horizontal .form-group label {
+    width: 150px;
+    margin-bottom: 0;
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+  
+  .form-horizontal .form-group input,
+  .form-horizontal .form-group select {
+    flex-grow: 1;
+    padding: 0.6rem 1rem;
+    border-radius: 10px;
+    font-size: 1.1rem;
+  }
+  
+  /* Progress bar */
+  .progress-modern {
+    height: 12px;
+    border-radius: 8px;
+    background-color: #e0e7ff;
+  }
+  
+  .progress-modern .progress-bar {
+    background-color: #1e3a8a;
+    border-radius: 8px;
+  }
+  
+  /* Logo et header du dashboard */
+  .dashboard-logo {
+    display: flex;
+    flex-direction: column; /* logo au-dessus du nom */
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background-color: #1e3a8a;
+    padding: 15px 20px;
+    border-radius: 12px;
+    text-align: center;
+  }
+  
+  .dashboard-logo img {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    background-color: #fff;
+    padding: 10px;
+    border-radius: 12px;
+  }
+  
+  .dashboard-logo span {
+    color: #fff;
+    font-weight: bold;
+    font-size: 2rem;
+    white-space: nowrap;
+  }
+
+  /* Styles pour la recherche et le filtrage */
+.input-group-text {
+  background-color: #1e3a8a;
+  color: white;
+  border: 1px solid #1e3a8a;
+}
+
+.form-select {
+  border-radius: 10px;
+  padding: 0.6rem 1rem;
+  font-size: 1.1rem;
+}
+
+/* Badges pour les notes */
+.badge {
+  font-size: 0.9rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+}
+
+/* Message quand aucun résultat */
+.text-muted {
+  font-style: italic;
+}
+
+/* Responsive pour les filtres */
+@media (max-width: 768px) {
+  .row.mb-3 .col-md-4,
+  .row.mb-3 .col-md-6 {
+    margin-bottom: 10px;
+  }
+}
+
+
+/* Notification System */
+.notification-toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10000;
+  min-width: 300px;
+  max-width: 500px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  animation: slideInRight 0.3s ease-out;
+}
+
+.notification-toast.success {
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+}
+
+.notification-toast.error {
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+}
+
+.notification-toast.info {
+  background: #d1ecf1;
+  border: 1px solid #bee5eb;
+  color: #0c5460;
+}
+
+.notification-content {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  position: relative;
+}
+
+.notification-icon {
+  font-size: 1.5rem;
+  margin-right: 15px;
+}
+
+.notification-message {
+  flex: 1;
+  font-weight: 500;
+}
+
+.notification-close {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 5px;
+  margin-left: 10px;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.notification-close:hover {
+  opacity: 1;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Responsive notifications */
+@media (max-width: 768px) {
+  .notification-toast {
+    left: 20px;
+    right: 20px;
+    min-width: auto;
+    max-width: none;
+  }
+}
+
+/* Form improvements */
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.form-control:required {
+  border-left: 3px solid #ff8800;
+}
+
+/* Button improvements */
+.btn {
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+  

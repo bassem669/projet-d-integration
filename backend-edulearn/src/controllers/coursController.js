@@ -9,7 +9,8 @@ exports.getAllCours = (req, res) => {
     `SELECT c.*, u.nom AS nomUtilisateur, cl.nomClasse 
      FROM Cours c
      LEFT JOIN Utilisateur u ON c.idUtilisateur = u.idUtilisateur
-     LEFT JOIN Classe cl ON c.idClasse = cl.idClasse`,
+     LEFT JOIN Classe cl ON c.idClasse = cl.idClasse
+     WHERE c.statut = 'APPROVED'`,
     (err, results) => {
       if (err) {
         console.error('Erreur lors de la récupération des cours :', err);
@@ -19,6 +20,7 @@ exports.getAllCours = (req, res) => {
     }
   );
 };
+
 
 exports.getCoursByEnseignant = (req, res) => {
   const { idUtilisateur } = req.params;

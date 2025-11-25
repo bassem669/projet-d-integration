@@ -44,6 +44,7 @@ import Unauthorized from "./pages/Unauthorized";
 import ForgotPasswordEmail from "./pages/forget password/ForgotPasswordEmail";
 import ForgotPasswordCode from "./pages/forget password/ForgotPasswordCode";
 import ForgotPasswordNew from "./pages/forget password/ForgotPasswordNew";
+import ForumEtudiant from "./pages/etudiant/ForumEtudiant";
 
 function AppContent() {
   const location = useLocation();
@@ -97,6 +98,15 @@ function AppContent() {
           element={
             <PrivateRoute roles={["etudiant"]}>
               <MesCours />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/forum"
+          element={
+            <PrivateRoute roles={["etudiant"]}>
+              <ForumEtudiant />
             </PrivateRoute>
           }
         />

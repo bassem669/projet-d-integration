@@ -317,62 +317,6 @@ const DetailCours = () => {
                 )}
               </div>
             </div>
-
-            {/* Forum */}
-            <div className="col-lg-5">
-              <div className="card-modern p-4">
-                <h5 className="mb-3">
-                  💬 Forum de discussion
-                </h5>
-                
-                <form onSubmit={handleSendMessage} className="mb-4">
-                  <div className="mb-2">
-                    <label className="form-label small text-muted">
-                      Poser une question ou partager un commentaire
-                    </label>
-                    <div className="input-group">
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Votre message..."
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                      />
-                      <button 
-                        type="submit" 
-                        className="btn btn-primary"
-                        disabled={!newMessage.trim()}
-                      >
-                        Envoyer
-                      </button>
-                    </div>
-                  </div>
-                </form>
-
-                <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
-                  {forumMessages.map(msg => (
-                    <div key={msg.id} className={`border rounded p-3 mb-3 ${msg.nomUtilisateur === 'Vous' ? 'bg-light' : ''}`}>
-                      <div className="d-flex justify-content-between align-items-start mb-2">
-                        <strong className={msg.nomUtilisateur === 'Vous' ? 'text-primary' : ''}>
-                          {msg.nomUtilisateur}
-                        </strong>
-                        <small className="text-muted">{msg.date}</small>
-                      </div>
-                      <p className="mb-0">{msg.contenu}</p>
-                    </div>
-                  ))}
-                  
-                  {forumMessages.length === 0 && (
-                    <div className="text-center py-4">
-                      <p className="text-muted">Aucun message dans le forum</p>
-                      <small className="text-muted">
-                        Soyez le premier à démarrer la conversation !
-                      </small>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
