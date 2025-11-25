@@ -1,37 +1,27 @@
-// controllers/evaluationController.js
-const connection = require('../config/db');
+// ==================== ÉVALUATIONS PDF - FONCTIONS ÉTUDIANT ====================
 
-// ==================== FONCTIONS ÉTUDIANT ====================
-
-// Obtenir toutes les évaluations (quiz) disponibles pour un étudiant
-exports.getEvaluationsForStudent = (req, res) => {
+// Obtenir toutes les évaluations PDF disponibles pour un étudiant
+exports.getEvaluationsPDFForStudent = (req, res) => {
   const studentId = req.user.id;
 
   connection.query(
     `SELECT 
-       q.idQuiz,
-       q.titre,
-       q.description,
-       q.type,
-       q.duree,
-       q.nbQuestions,
-       q.created_at,
-       c.titre as nomCours,
-       COUNT(DISTINCT qq.idQuestion) as nombreQuestionsReelles,
-       rq.note as noteObtenue,
-       rq.date as datePassation
-     FROM Quiz q
-     JOIN Cours c ON q.idCours = c.idCours
+       ep.idEvaluation,
+       ep.titre,
+       ep.description,
+       ep.fichierEvaluation,
+       ep.dateLimite,
+       ep.created_at,
+       c.titre as nomCours
+     FROM EvaluationPDF ep
+     JOIN Cours c ON ep.idCours = c.idCours
      JOIN inscription i ON c.idCours = i.idCours
-     LEFT JOIN QuestionQuiz qq ON q.idQuiz = qq.idQuiz
-     LEFT JOIN ResultatQuiz rq ON q.idQuiz = rq.idQuiz AND rq.idEtudiant = ?
-     WHERE i.idEtudiant = ? AND q.actif = TRUE
-     GROUP BY q.idQuiz
-     ORDER BY q.created_at DESC`,
-    [studentId, studentId],
+     WHERE i.idEtudiant = ? AND ep.actif = TRUE
+     ORDER BY ep.created_at DESC`,
+    [studentId],
     (err, results) => {
       if (err) {
-        console.error('Error fetching evaluations:', err);
+        console.error('Error fetching PDF evaluations:', err);
         return res.status(500).json({ message: 'Erreur serveur' });
       }
       res.json(results);
@@ -39,283 +29,89 @@ exports.getEvaluationsForStudent = (req, res) => {
   );
 };
 
-// Obtenir une évaluation spécifique avec ses questions
-exports.getEvaluationById = (req, res) => {
+// Obtenir une évaluation PDF spécifique
+exports.getEvaluationPDFById = (req, res) => {
   const { id } = req.params;
   const studentId = req.user.id;
 
-  // Vérifier l'accès à l'évaluation
   connection.query(
-    `SELECT q.*, c.titre as nomCours 
-     FROM Quiz q
-     JOIN Cours c ON q.idCours = c.idCours
+    `SELECT 
+       ep.*, 
+       c.titre as nomCours
+     FROM EvaluationPDF ep
+     JOIN Cours c ON ep.idCours = c.idCours
      JOIN inscription i ON c.idCours = i.idCours
-     WHERE q.idQuiz = ? AND i.idEtudiant = ? AND q.actif = TRUE`,
+     WHERE ep.idEvaluation = ? AND i.idEtudiant = ? AND ep.actif = TRUE`,
     [id, studentId],
-    (err, evaluationResults) => {
+    (err, results) => {
+      if (err) {
+        console.error('Error fetching PDF evaluation:', err);
+        return res.status(500).json({ message: 'Erreur serveur' });
+      }
+
+      if (results.length === 0) {
+        return res.status(404).json({ message: 'Évaluation non trouvée ou accès non autorisé' });
+      }
+
+      res.json(results[0]);
+    }
+  );
+};
+
+// Télécharger une évaluation PDF
+exports.downloadEvaluationPDF = (req, res) => {
+  const { id } = req.params;
+  const studentId = req.user.id;
+
+  // Vérifier que l'étudiant a accès à cette évaluation
+  connection.query(
+    `SELECT ep.fichierEvaluation, ep.titre
+     FROM EvaluationPDF ep
+     JOIN Cours c ON ep.idCours = c.idCours
+     JOIN inscription i ON c.idCours = i.idCours
+     WHERE ep.idEvaluation = ? AND i.idEtudiant = ? AND ep.actif = TRUE`,
+    [id, studentId],
+    (err, results) => {
       if (err) {
         console.error('Error verifying evaluation access:', err);
         return res.status(500).json({ message: 'Erreur serveur' });
       }
 
-      if (evaluationResults.length === 0) {
+      if (results.length === 0) {
         return res.status(404).json({ message: 'Évaluation non trouvée ou accès non autorisé' });
       }
 
-      // Vérifier si l'étudiant a déjà passé cette évaluation
-      connection.query(
-        `SELECT * FROM ResultatQuiz 
-         WHERE idQuiz = ? AND idEtudiant = ?`,
-        [id, studentId],
-        (err, resultResults) => {
-          if (err) {
-            console.error('Error checking previous results:', err);
-            return res.status(500).json({ message: 'Erreur serveur' });
-          }
+      const evaluation = results[0];
+      const filePath = path.join(__dirname, '../uploads/evaluations', evaluation.fichierEvaluation);
 
-          // Obtenir les questions avec réponses (sans indiquer les bonnes réponses)
-          connection.query(
-            `SELECT 
-                qq.idQuestion, 
-                qq.enonce, 
-                qq.type,
-                qq.ordre,
-                JSON_ARRAYAGG(
-                  JSON_OBJECT(
-                    'idReponse', rp.idReponse,
-                    'reponse', rp.reponse
-                  )
-                ) as reponses
-             FROM QuestionQuiz qq
-             LEFT JOIN ReponsePossible rp ON qq.idQuestion = rp.idQuestion
-             WHERE qq.idQuiz = ?
-             GROUP BY qq.idQuestion
-             ORDER BY qq.ordre ASC`,
-            [id],
-            (err, questionResults) => {
-              if (err) {
-                console.error('Error fetching questions:', err);
-                return res.status(500).json({ message: 'Erreur serveur' });
-              }
+      // Vérifier si le fichier existe
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ message: 'Fichier non trouvé' });
+      }
 
-              res.json({
-                evaluation: evaluationResults[0],
-                questions: questionResults,
-                dejaPasse: resultResults.length > 0,
-                resultatPrecedent: resultResults.length > 0 ? resultResults[0] : null
-              });
-            }
-          );
-        }
-      );
-    }
-  );
-};
-
-// Soumettre une évaluation (quiz)
-exports.submitEvaluation = (req, res) => {
-  const { id } = req.params;
-  const studentId = req.user.id;
-  const { reponses, tempsUtilise } = req.body;
-
-  connection.beginTransaction(err => {
-    if (err) {
-      console.error('Transaction error:', err);
-      return res.status(500).json({ message: 'Erreur serveur' });
-    }
-
-    // Vérifier que l'étudiant n'a pas déjà passé cette évaluation
-    connection.query(
-      `SELECT * FROM ResultatQuiz 
-       WHERE idQuiz = ? AND idEtudiant = ?`,
-      [id, studentId],
-      (err, existingResults) => {
+      // Télécharger le fichier
+      res.download(filePath, `${evaluation.titre}.pdf`, (err) => {
         if (err) {
-          return connection.rollback(() => {
-            console.error('Error checking existing results:', err);
-            res.status(500).json({ message: 'Erreur serveur' });
-          });
+          console.error('Error downloading file:', err);
+          res.status(500).json({ message: 'Erreur lors du téléchargement' });
         }
-
-        if (existingResults.length > 0) {
-          return connection.rollback(() => {
-            res.status(400).json({ message: 'Vous avez déjà passé cette évaluation' });
-          });
-        }
-
-        // Obtenir les bonnes réponses
-        connection.query(
-          `SELECT qq.idQuestion, rp.idReponse
-           FROM QuestionQuiz qq
-           JOIN ReponsePossible rp ON qq.idQuestion = rp.idQuestion
-           WHERE qq.idQuiz = ? AND rp.correct = TRUE`,
-          [id],
-          (err, correctAnswers) => {
-            if (err) {
-              return connection.rollback(() => {
-                console.error('Error fetching correct answers:', err);
-                res.status(500).json({ message: 'Erreur serveur' });
-              });
-            }
-
-            // Calculer le score
-            let score = 0;
-            const correctAnswersMap = {};
-            
-            correctAnswers.forEach(ca => {
-              correctAnswersMap[ca.idQuestion] = ca.idReponse;
-            });
-
-            const totalQuestions = Object.keys(correctAnswersMap).length;
-            
-            // Vérifier chaque réponse de l'étudiant
-            Object.keys(reponses).forEach(questionId => {
-              if (correctAnswersMap[questionId] && parseInt(reponses[questionId]) === correctAnswersMap[questionId]) {
-                score++;
-              }
-            });
-
-            const noteFinale = totalQuestions > 0 ? (score / totalQuestions) * 20 : 0;
-
-            // Enregistrer le résultat
-            connection.query(
-              `INSERT INTO ResultatQuiz (idEtudiant, idQuiz, note, tempsUtilise, date) 
-               VALUES (?, ?, ?, ?, CURDATE())`,
-              [studentId, id, noteFinale, tempsUtilise],
-              (err, result) => {
-                if (err) {
-                  return connection.rollback(() => {
-                    console.error('Error saving evaluation result:', err);
-                    res.status(500).json({ message: 'Erreur lors de la sauvegarde du résultat' });
-                  });
-                }
-
-                connection.commit(err => {
-                  if (err) {
-                    return connection.rollback(() => {
-                      console.error('Commit error:', err);
-                      res.status(500).json({ message: 'Erreur serveur' });
-                    });
-                  }
-
-                  res.json({
-                    message: 'Évaluation soumise avec succès',
-                    score: Math.round(noteFinale * 100) / 100,
-                    pointsObtenus: score,
-                    totalPoints: totalQuestions,
-                    pourcentage: Math.round((score / totalQuestions) * 100)
-                  });
-                });
-              }
-            );
-          }
-        );
-      }
-    );
-  });
-};
-
-// Obtenir les résultats d'évaluation d'un étudiant
-exports.getStudentEvaluationResults = (req, res) => {
-  const studentId = req.user.id;
-
-  connection.query(
-    `SELECT 
-       rq.*,
-       q.titre as titreEvaluation,
-       q.type,
-       c.titre as nomCours,
-       (SELECT COUNT(*) FROM QuestionQuiz qq WHERE qq.idQuiz = q.idQuiz) as totalQuestions
-     FROM ResultatQuiz rq
-     JOIN Quiz q ON rq.idQuiz = q.idQuiz
-     JOIN Cours c ON q.idCours = c.idCours
-     WHERE rq.idEtudiant = ?
-     ORDER BY rq.date DESC, rq.created_at DESC`,
-    [studentId],
-    (err, results) => {
-      if (err) {
-        console.error('Error fetching evaluation results:', err);
-        return res.status(500).json({ message: 'Erreur serveur' });
-      }
-      res.json(results);
-    }
-  );
-};
-
-// Statistiques d'évaluation pour un étudiant
-exports.getEvaluationStats = (req, res) => {
-  const studentId = req.user.id;
-
-  connection.query(
-    `SELECT 
-       COUNT(DISTINCT rq.idQuiz) as totalEvaluationsPassees,
-       COUNT(DISTINCT q.idQuiz) as totalEvaluationsDisponibles,
-       AVG(rq.note) as moyenneGenerale,
-       MAX(rq.note) as meilleureNote,
-       MIN(rq.note) as pireNote,
-       COUNT(DISTINCT c.idCours) as coursAvecEvaluations
-     FROM ResultatQuiz rq
-     JOIN Quiz q ON rq.idQuiz = q.idQuiz
-     JOIN Cours c ON q.idCours = c.idCours
-     JOIN inscription i ON c.idCours = i.idCours
-     WHERE rq.idEtudiant = ? AND i.idEtudiant = ?`,
-    [studentId, studentId],
-    (err, results) => {
-      if (err) {
-        console.error('Error fetching evaluation stats:', err);
-        return res.status(500).json({ message: 'Erreur serveur' });
-      }
-
-      const stats = results[0];
-      
-      // Calculer le pourcentage de completion
-      const pourcentageCompletion = stats.totalEvaluationsDisponibles > 0 
-        ? Math.round((stats.totalEvaluationsPassees / stats.totalEvaluationsDisponibles) * 100)
-        : 0;
-
-      res.json({
-        ...stats,
-        pourcentageCompletion,
-        moyenneGenerale: Math.round(stats.moyenneGenerale * 100) / 100 || 0
       });
     }
   );
 };
 
-// Obtenir les évaluations par cours
-exports.getEvaluationsByCourse = (req, res) => {
-  const { coursId } = req.params;
-  const studentId = req.user.id;
+// ==================== ÉVALUATIONS PDF - FONCTIONS ENSEIGNANT ====================
 
-  connection.query(
-    `SELECT 
-       q.*,
-       rq.note as noteObtenue,
-       rq.date as datePassation,
-       COUNT(DISTINCT qq.idQuestion) as totalQuestions
-     FROM Quiz q
-     LEFT JOIN ResultatQuiz rq ON q.idQuiz = rq.idQuiz AND rq.idEtudiant = ?
-     LEFT JOIN QuestionQuiz qq ON q.idQuiz = qq.idQuiz
-     WHERE q.idCours = ? AND q.actif = TRUE
-     GROUP BY q.idQuiz
-     ORDER BY q.created_at DESC`,
-    [studentId, coursId],
-    (err, results) => {
-      if (err) {
-        console.error('Error fetching course evaluations:', err);
-        return res.status(500).json({ message: 'Erreur serveur' });
-      }
-      res.json(results);
-    }
-  );
-};
-
-// ==================== FONCTIONS ENSEIGNANT ====================
-
-// Créer une nouvelle évaluation
-exports.createEvaluation = (req, res) => {
-  const { titre, description, idCours, duree, nbQuestions, type } = req.body;
+// Créer une nouvelle évaluation PDF
+exports.createEvaluationPDF = (req, res) => {
+  const { titre, description, idCours, dateLimite } = req.body;
   const teacherId = req.user.id;
+
+  if (!req.file) {
+    return res.status(400).json({ message: 'Aucun fichier d\'évaluation fourni' });
+  }
+
+  const fichierEvaluation = req.file.filename;
 
   // Vérifier que l'enseignant est propriétaire du cours
   connection.query(
@@ -332,17 +128,17 @@ exports.createEvaluation = (req, res) => {
       }
 
       connection.query(
-        `INSERT INTO Quiz (titre, description, idCours, duree, nbQuestions, type) 
-         VALUES (?, ?, ?, ?, ?, ?)`,
-        [titre, description, idCours, duree, nbQuestions, type],
+        `INSERT INTO EvaluationPDF (titre, description, idCours, fichierEvaluation, dateLimite) 
+         VALUES (?, ?, ?, ?, ?)`,
+        [titre, description, idCours, fichierEvaluation, dateLimite],
         (err, result) => {
           if (err) {
-            console.error('Error creating evaluation:', err);
+            console.error('Error creating PDF evaluation:', err);
             return res.status(500).json({ message: 'Erreur lors de la création de l\'évaluation' });
           }
 
           res.status(201).json({
-            message: 'Évaluation créée avec succès',
+            message: 'Évaluation PDF créée avec succès',
             idEvaluation: result.insertId
           });
         }
@@ -351,28 +147,25 @@ exports.createEvaluation = (req, res) => {
   );
 };
 
-// Obtenir toutes les évaluations d'un enseignant
-exports.getTeacherEvaluations = (req, res) => {
+// Obtenir toutes les évaluations PDF d'un enseignant
+exports.getTeacherEvaluationsPDF = (req, res) => {
   const teacherId = req.user.id;
 
   connection.query(
     `SELECT 
-       q.*, 
+       ep.*, 
        c.titre as nomCours,
-       COUNT(DISTINCT qq.idQuestion) as nombreQuestions,
-       COUNT(DISTINCT rq.idResultat) as nombreSoumissions,
-       AVG(rq.note) as moyenneNotes
-     FROM Quiz q
-     JOIN Cours c ON q.idCours = c.idCours
-     LEFT JOIN QuestionQuiz qq ON q.idQuiz = qq.idQuiz
-     LEFT JOIN ResultatQuiz rq ON q.idQuiz = rq.idQuiz
+       (SELECT COUNT(*) 
+        FROM inscription i 
+        WHERE i.idCours = c.idCours) as totalEtudiants
+     FROM EvaluationPDF ep
+     JOIN Cours c ON ep.idCours = c.idCours
      WHERE c.idUtilisateur = ?
-     GROUP BY q.idQuiz
-     ORDER BY q.created_at DESC`,
+     ORDER BY ep.created_at DESC`,
     [teacherId],
     (err, results) => {
       if (err) {
-        console.error('Error fetching teacher evaluations:', err);
+        console.error('Error fetching teacher PDF evaluations:', err);
         return res.status(500).json({ message: 'Erreur serveur' });
       }
       res.json(results);
@@ -380,197 +173,49 @@ exports.getTeacherEvaluations = (req, res) => {
   );
 };
 
-// Obtenir les détails d'une évaluation pour l'enseignant
-exports.getEvaluationDetailsForTeacher = (req, res) => {
+// Obtenir les détails d'une évaluation PDF pour l'enseignant
+exports.getEvaluationPDFDetails = (req, res) => {
   const { id } = req.params;
   const teacherId = req.user.id;
 
   connection.query(
-    `SELECT q.*, c.titre as nomCours
-     FROM Quiz q
-     JOIN Cours c ON q.idCours = c.idCours
-     WHERE q.idQuiz = ? AND c.idUtilisateur = ?`,
+    `SELECT 
+       ep.*, 
+       c.titre as nomCours,
+       (SELECT COUNT(*) 
+        FROM inscription i 
+        WHERE i.idCours = c.idCours) as totalEtudiants
+     FROM EvaluationPDF ep
+     JOIN Cours c ON ep.idCours = c.idCours
+     WHERE ep.idEvaluation = ? AND c.idUtilisateur = ?`,
     [id, teacherId],
-    (err, evaluationResults) => {
+    (err, results) => {
       if (err) {
-        console.error('Error fetching evaluation details:', err);
+        console.error('Error fetching PDF evaluation details:', err);
         return res.status(500).json({ message: 'Erreur serveur' });
       }
 
-      if (evaluationResults.length === 0) {
+      if (results.length === 0) {
         return res.status(404).json({ message: 'Évaluation non trouvée' });
       }
 
-      // Récupérer les questions avec toutes les réponses
-      connection.query(
-        `SELECT 
-            qq.idQuestion, 
-            qq.enonce, 
-            qq.type,
-            qq.ordre,
-            JSON_ARRAYAGG(
-              JSON_OBJECT(
-                'idReponse', rp.idReponse,
-                'reponse', rp.reponse,
-                'correct', rp.correct
-              )
-            ) as reponses
-         FROM QuestionQuiz qq
-         LEFT JOIN ReponsePossible rp ON qq.idQuestion = rp.idQuestion
-         WHERE qq.idQuiz = ?
-         GROUP BY qq.idQuestion
-         ORDER BY qq.ordre ASC`,
-        [id],
-        (err, questionResults) => {
-          if (err) {
-            console.error('Error fetching questions:', err);
-            return res.status(500).json({ message: 'Erreur serveur' });
-          }
-
-          // Récupérer les statistiques des résultats
-          connection.query(
-            `SELECT 
-               COUNT(*) as totalSoumissions,
-               AVG(note) as moyenne,
-               MAX(note) as meilleureNote,
-               MIN(note) as pireNote,
-               COUNT(DISTINCT idEtudiant) as etudiantsUniques
-             FROM ResultatQuiz 
-             WHERE idQuiz = ?`,
-            [id],
-            (err, statsResults) => {
-              if (err) {
-                console.error('Error fetching stats:', err);
-                return res.status(500).json({ message: 'Erreur serveur' });
-              }
-
-              res.json({
-                evaluation: evaluationResults[0],
-                questions: questionResults,
-                statistiques: statsResults[0] || {}
-              });
-            }
-          );
-        }
-      );
+      res.json(results[0]);
     }
   );
 };
 
-// Ajouter une question à une évaluation
-exports.addQuestionToEvaluation = (req, res) => {
+// Modifier une évaluation PDF
+exports.updateEvaluationPDF = (req, res) => {
   const { id } = req.params;
-  const { enonce, type, ordre, reponses } = req.body;
-  const teacherId = req.user.id;
-
-  connection.beginTransaction(err => {
-    if (err) {
-      console.error('Transaction error:', err);
-      return res.status(500).json({ message: 'Erreur serveur' });
-    }
-
-    // Vérifier que l'enseignant est propriétaire de l'évaluation
-    connection.query(
-      `SELECT q.idQuiz 
-       FROM Quiz q
-       JOIN Cours c ON q.idCours = c.idCours
-       WHERE q.idQuiz = ? AND c.idUtilisateur = ?`,
-      [id, teacherId],
-      (err, evaluationResults) => {
-        if (err) {
-          return connection.rollback(() => {
-            console.error('Error verifying evaluation ownership:', err);
-            res.status(500).json({ message: 'Erreur serveur' });
-          });
-        }
-
-        if (evaluationResults.length === 0) {
-          return connection.rollback(() => {
-            res.status(403).json({ message: 'Vous n\'êtes pas autorisé à modifier cette évaluation' });
-          });
-        }
-
-        // Ajouter la question
-        connection.query(
-          `INSERT INTO QuestionQuiz (enonce, type, ordre, idQuiz) 
-           VALUES (?, ?, ?, ?)`,
-          [enonce, type, ordre, id],
-          (err, questionResult) => {
-            if (err) {
-              return connection.rollback(() => {
-                console.error('Error adding question:', err);
-                res.status(500).json({ message: 'Erreur lors de l\'ajout de la question' });
-              });
-            }
-
-            const questionId = questionResult.insertId;
-
-            // Ajouter les réponses possibles
-            if (reponses && reponses.length > 0) {
-              const reponseValues = reponses.map(reponse => 
-                [reponse.reponse, reponse.correct, questionId]
-              );
-
-              connection.query(
-                `INSERT INTO ReponsePossible (reponse, correct, idQuestion) 
-                 VALUES ?`,
-                [reponseValues],
-                (err) => {
-                  if (err) {
-                    return connection.rollback(() => {
-                      console.error('Error adding answers:', err);
-                      res.status(500).json({ message: 'Erreur lors de l\'ajout des réponses' });
-                    });
-                  }
-
-                  connection.commit(err => {
-                    if (err) {
-                      return connection.rollback(() => {
-                        console.error('Commit error:', err);
-                        res.status(500).json({ message: 'Erreur serveur' });
-                      });
-                    }
-
-                    res.status(201).json({
-                      message: 'Question ajoutée avec succès',
-                      idQuestion: questionId
-                    });
-                  });
-                }
-              );
-            } else {
-              connection.commit(err => {
-                if (err) {
-                  return connection.rollback(() => {
-                    console.error('Commit error:', err);
-                    res.status(500).json({ message: 'Erreur serveur' });
-                  });
-                }
-
-                res.status(201).json({
-                  message: 'Question ajoutée avec succès',
-                  idQuestion: questionId
-                });
-              });
-            }
-          }
-        );
-      }
-    );
-  });
-};
-
-// Obtenir les résultats détaillés d'une évaluation
-exports.getEvaluationResultsDetails = (req, res) => {
-  const { id } = req.params;
+  const { titre, description, dateLimite, actif } = req.body;
   const teacherId = req.user.id;
 
   // Vérifier que l'enseignant est propriétaire de l'évaluation
   connection.query(
-    `SELECT q.idQuiz 
-     FROM Quiz q
-     JOIN Cours c ON q.idCours = c.idCours
-     WHERE q.idQuiz = ? AND c.idUtilisateur = ?`,
+    `SELECT ep.idEvaluation 
+     FROM EvaluationPDF ep
+     JOIN Cours c ON ep.idCours = c.idCours
+     WHERE ep.idEvaluation = ? AND c.idUtilisateur = ?`,
     [id, teacherId],
     (err, evaluationResults) => {
       if (err) {
@@ -582,58 +227,152 @@ exports.getEvaluationResultsDetails = (req, res) => {
         return res.status(403).json({ message: 'Accès non autorisé' });
       }
 
+      // Préparer les champs à mettre à jour
+      let updateFields = [];
+      let updateValues = [];
+
+      if (titre !== undefined) {
+        updateFields.push('titre = ?');
+        updateValues.push(titre);
+      }
+      if (description !== undefined) {
+        updateFields.push('description = ?');
+        updateValues.push(description);
+      }
+      if (dateLimite !== undefined) {
+        updateFields.push('dateLimite = ?');
+        updateValues.push(dateLimite);
+      }
+      if (actif !== undefined) {
+        updateFields.push('actif = ?');
+        updateValues.push(actif);
+      }
+
+      // Gérer le fichier s'il est fourni
+      if (req.file) {
+        updateFields.push('fichierEvaluation = ?');
+        updateValues.push(req.file.filename);
+      }
+
+      if (updateFields.length === 0) {
+        return res.status(400).json({ message: 'Aucune donnée à mettre à jour' });
+      }
+
+      updateValues.push(id);
+
       connection.query(
-        `SELECT 
-           rq.*, 
-           u.nom, 
-           u.prenom, 
-           u.email,
-           (SELECT COUNT(*) FROM QuestionQuiz qq WHERE qq.idQuiz = ?) as totalQuestions
-         FROM ResultatQuiz rq
-         JOIN Utilisateur u ON rq.idEtudiant = u.idUtilisateur
-         WHERE rq.idQuiz = ?
-         ORDER BY rq.note DESC`,
-        [id, id],
-        (err, results) => {
+        `UPDATE EvaluationPDF 
+         SET ${updateFields.join(', ')}, updated_at = NOW()
+         WHERE idEvaluation = ?`,
+        updateValues,
+        (err, result) => {
           if (err) {
-            console.error('Error fetching evaluation results:', err);
-            return res.status(500).json({ message: 'Erreur serveur' });
+            console.error('Error updating PDF evaluation:', err);
+            return res.status(500).json({ message: 'Erreur lors de la mise à jour' });
           }
-          res.json(results);
+
+          res.json({
+            message: 'Évaluation mise à jour avec succès'
+          });
         }
       );
     }
   );
 };
 
-// Statistiques globales des évaluations pour un enseignant
-exports.getTeacherEvaluationStats = (req, res) => {
+// Supprimer une évaluation PDF
+exports.deleteEvaluationPDF = (req, res) => {
+  const { id } = req.params;
+  const teacherId = req.user.id;
+
+  connection.beginTransaction(err => {
+    if (err) {
+      console.error('Transaction error:', err);
+      return res.status(500).json({ message: 'Erreur serveur' });
+    }
+
+    // Vérifier que l'enseignant est propriétaire de l'évaluation
+    connection.query(
+      `SELECT ep.fichierEvaluation 
+       FROM EvaluationPDF ep
+       JOIN Cours c ON ep.idCours = c.idCours
+       WHERE ep.idEvaluation = ? AND c.idUtilisateur = ?`,
+      [id, teacherId],
+      (err, evaluationResults) => {
+        if (err) {
+          return connection.rollback(() => {
+            console.error('Error verifying evaluation ownership:', err);
+            res.status(500).json({ message: 'Erreur serveur' });
+          });
+        }
+
+        if (evaluationResults.length === 0) {
+          return connection.rollback(() => {
+            res.status(403).json({ message: 'Accès non autorisé' });
+          });
+        }
+
+        // Supprimer l'évaluation
+        connection.query(
+          `DELETE FROM EvaluationPDF WHERE idEvaluation = ?`,
+          [id],
+          (err, result) => {
+            if (err) {
+              return connection.rollback(() => {
+                console.error('Error deleting evaluation:', err);
+                res.status(500).json({ message: 'Erreur lors de la suppression' });
+              });
+            }
+
+            // Supprimer le fichier physique
+            const fichierEvaluation = evaluationResults[0].fichierEvaluation;
+            const filePath = path.join(__dirname, '../uploads/evaluations', fichierEvaluation);
+            
+            if (fs.existsSync(filePath)) {
+              fs.unlinkSync(filePath);
+            }
+
+            connection.commit(err => {
+              if (err) {
+                return connection.rollback(() => {
+                  console.error('Commit error:', err);
+                  res.status(500).json({ message: 'Erreur serveur' });
+                });
+              }
+
+              res.json({
+                message: 'Évaluation supprimée avec succès'
+              });
+            });
+          }
+        );
+      }
+    );
+  });
+};
+
+// Statistiques des évaluations PDF pour un enseignant
+exports.getTeacherPDFStats = (req, res) => {
   const teacherId = req.user.id;
 
   connection.query(
     `SELECT 
-       COUNT(DISTINCT q.idQuiz) as totalEvaluations,
-       COUNT(DISTINCT rq.idResultat) as totalSoumissions,
-       COUNT(DISTINCT rq.idEtudiant) as etudiantsUniques,
-       AVG(rq.note) as moyenneGenerale,
-       COUNT(DISTINCT c.idCours) as coursAvecEvaluations
-     FROM Quiz q
-     JOIN Cours c ON q.idCours = c.idCours
-     LEFT JOIN ResultatQuiz rq ON q.idQuiz = rq.idQuiz
+       COUNT(*) as totalEvaluations,
+       COUNT(CASE WHEN actif = TRUE THEN 1 END) as evaluationsActives,
+       COUNT(CASE WHEN dateLimite IS NOT NULL AND dateLimite > NOW() THEN 1 END) as evaluationsEnCours,
+       COUNT(CASE WHEN dateLimite IS NOT NULL AND dateLimite < NOW() THEN 1 END) as evaluationsExpirees,
+       COUNT(DISTINCT idCours) as coursAvecEvaluations
+     FROM EvaluationPDF ep
+     JOIN Cours c ON ep.idCours = c.idCours
      WHERE c.idUtilisateur = ?`,
     [teacherId],
     (err, results) => {
       if (err) {
-        console.error('Error fetching teacher evaluation stats:', err);
+        console.error('Error fetching PDF evaluation stats:', err);
         return res.status(500).json({ message: 'Erreur serveur' });
       }
 
-      const stats = results[0];
-      
-      res.json({
-        ...stats,
-        moyenneGenerale: Math.round(stats.moyenneGenerale * 100) / 100 || 0
-      });
+      res.json(results[0]);
     }
   );
 };

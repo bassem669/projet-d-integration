@@ -1,24 +1,20 @@
-// routes/evaluationRoute.js
 const express = require('express');
 const router = express.Router();
 const evaluationController = require('../controllers/evaluationController');
 const auth = require('../middleware/authMiddleware');
+const { uploadEvaluation } = require('../config/multer');
 
+// Routes pour étudiants
+router.get('/pdf', auth, evaluationController.getEvaluationsPDFForStudent);
+router.get('/pdf/:id', auth, evaluationController.getEvaluationPDFById);
+router.get('/pdf/:id/download', auth, evaluationController.downloadEvaluationPDF);
 
-// ==================== ROUTES ÉTUDIANT ====================
-router.get('/student/evaluations', auth, evaluationController.getEvaluationsForStudent);
-router.get('/student/evaluations/:id', auth, evaluationController.getEvaluationById);
-router.post('/student/evaluations/:id/submit', auth, evaluationController.submitEvaluation);
-router.get('/student/evaluation-results', auth, evaluationController.getStudentEvaluationResults);
-router.get('/student/evaluation-stats', auth, evaluationController.getEvaluationStats);
-router.get('/student/evaluations/course/:coursId', auth, evaluationController.getEvaluationsByCourse);
-
-// ==================== ROUTES ENSEIGNANT ====================
-router.post('/teacher/evaluations', auth, evaluationController.createEvaluation);
-router.get('/teacher/evaluations', auth, evaluationController.getTeacherEvaluations);
-router.get('/teacher/evaluations/:id', auth, evaluationController.getEvaluationDetailsForTeacher);
-router.post('/teacher/evaluations/:id/questions', auth, evaluationController.addQuestionToEvaluation);
-router.get('/teacher/evaluations/:id/results', auth, evaluationController.getEvaluationResultsDetails);
-router.get('/teacher/evaluation-stats', auth, evaluationController.getTeacherEvaluationStats);
+// Routes pour enseignants
+router.post('/pdf', auth, uploadEvaluation.single('fichier'), evaluationController.createEvaluationPDF);
+router.get('/pdf/teacher/all', auth, evaluationController.getTeacherEvaluationsPDF);
+router.get('/pdf/teacher/:id', auth, evaluationController.getEvaluationPDFDetails);
+router.put('/pdf/teacher/:id', auth, uploadEvaluation.single('fichier'), evaluationController.updateEvaluationPDF);
+router.delete('/pdf/teacher/:id', auth, evaluationController.deleteEvaluationPDF);
+router.get('/pdf/teacher/stats', auth, evaluationController.getTeacherPDFStats);
 
 module.exports = router;
