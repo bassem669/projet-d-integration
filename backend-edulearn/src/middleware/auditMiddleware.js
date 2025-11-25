@@ -3,8 +3,15 @@ const connection = require("../config/db");
 function auditMiddleware(action) {
   return (req, res, next) => {
     try {
-      const adminId = req.user ? req.user.idUtilisateur : null;
+      const adminId = req.user ? req.user.id : null;
 
+      const ip =
+        req.headers["x-forwarded-for"]?.split(",")[0] ||
+        req.connection.remoteAddress ||
+        req.socket.remoteAddress ||
+        req.ip;
+
+      console.log
       const sql = `
         INSERT INTO audit_logs (adminId, action, method, route, ip)
         VALUES (?, ?, ?, ?, ?)
@@ -14,7 +21,7 @@ function auditMiddleware(action) {
         action,
         req.method,
         req.originalUrl,
-        req.ip
+        ip
       ];
 
       connection.query(sql, params, (err) => {

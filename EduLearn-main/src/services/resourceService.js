@@ -1,5 +1,6 @@
 // src/services/resourceService.js
 import { API_ENDPOINTS, getAuthHeaders } from './apiConfig';
+import axios from "axios";
 
 export const resourceService = {
   // Récupérer les ressources d'un cours
@@ -30,29 +31,21 @@ export const resourceService = {
   },
 
   // Ajouter une ressource
-  async addResource(resourceData) {
+   async addResource(formData) {
     try {
-      const response = await fetch(API_ENDPOINTS.RESOURCES, {
-        method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({
-          courseId: resourceData.courseId,
-          type: resourceData.type,
-          url: resourceData.url,
-          file: resourceData.url
-        })
+      const response = await axios.post(API_ENDPOINTS.RESOURCES, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        onUploadProgress: (progressEvent) => {
+          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          // Vous pouvez gérer la progression ici si nécessaire
+        }
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Erreur lors de l\'ajout de la ressource');
-      }
-
-      const data = await response.json();
-      return data;
+      return response.data;
     } catch (error) {
-      console.error('Erreur resourceService.addResource:', error);
-      throw error;
+      throw new Error(error.response?.data?.message || 'Erreur lors de l\'ajout de la ressource');
     }
   },
 

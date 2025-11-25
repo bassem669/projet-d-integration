@@ -169,21 +169,6 @@ export default function TeacherDashboard() {
 
                 <div className="col-sm-6 col-md-3">
                   <div className="card-modern text-center p-3">
-                    <FaBookOpen size={40} className="mb-2 text-warning" />
-                    <h6>Cours ce mois</h6>
-                    <h3>
-                      {courses.filter(course => {
-                        const courseDate = new Date(course.date);
-                        const now = new Date();
-                        return courseDate.getMonth() === now.getMonth() && 
-                               courseDate.getFullYear() === now.getFullYear();
-                      }).length}
-                    </h3>
-                  </div>
-                </div>
-
-                <div className="col-sm-6 col-md-3">
-                  <div className="card-modern text-center p-3">
                     <FaEnvelopeOpenText size={40} className="mb-2 text-info" />
                     <h6>Classes</h6>
                     <h3>

@@ -31,17 +31,23 @@ router.put(
   adminController.toggleUserStatus
 );
 
+router.delete("/users/:id", 
+  auth,
+  role(['admin']),
+  audit('delete utilisateur'),
+  adminController.deleteUser
+);
 // ===================== COURSES =====================
 router.get(
-  '/courses/pending',
+  '/courses',
   auth,
   role(['admin']),
   audit('Cours en attente'),
-  adminController.getPendingCourses
+  adminController.getCourses
 );
 
 router.put(
-  '/courses/:id/status',
+  '/courses/:courseId/status',
   auth,
   role(['admin']),
   audit('Changement statut cours'),
@@ -73,6 +79,8 @@ router.get(
   audit('Historique backups'),
   adminController.getBackupsHistory
 );
+
+
 
 // ===================== SECURITY =====================
 router.get(

@@ -9,7 +9,7 @@ exports.getAllUsers = (req, res) => {
   const { role, search } = req.query;
 
   let query = `
-      SELECT idUtilisateur, nom, prenom, email, role, created_at
+      SELECT idUtilisateur, nom, prenom, email, role,status, created_at
       FROM Utilisateur
       WHERE 1=1
   `;
@@ -59,11 +59,42 @@ exports.toggleUserStatus = (req, res) => {
   );
 };
 
+
+exports.deleteUser = (req, res) => {
+  const userId = req.params.id;
+
+  const deleteCours = "DELETE FROM cours WHERE idUtilisateur = ?";
+  const deleteUser = "DELETE FROM utilisateur WHERE idUtilisateur = ?";
+
+  connection.query(deleteCours, [userId], (err) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: "Erreur suppression cours" });
+    }
+
+    connection.query(deleteUser, [userId], (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Erreur suppression utilisateur" });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: "Utilisateur non trouvé" });
+      }
+
+      res.json({ message: "Utilisateur supprimé avec succès" });
+    });
+  });
+};
+
+
+
 // ===================== COURS =====================
-exports.getPendingCourses = (req, res) => {
+// backend/controllers/adminController.js
+exports.getCourses = (req, res) => {
   const { search } = req.query;
 
-  let query = "SELECT * FROM Cours WHERE status = 'PENDING'";
+  let query = "SELECT Cours.*, Utilisateur.nom AS nom_enseignant FROM Cours JOIN Utilisateur ON Cours.idUtilisateur = Utilisateur.idUtilisateur WHERE 1 = 1;";
   const params = [];
 
   if (search) {
@@ -72,21 +103,38 @@ exports.getPendingCourses = (req, res) => {
   }
 
   connection.query(query, params, (err, results) => {
-    if (err) return res.status(500).json({ message: "Erreur serveur" });
+    if (err) {
+      console.error('Erreur SQL:', err);
+      return res.status(500).json({ message: "Erreur serveur" });
+    }
     res.json(results);
   });
 };
 
 exports.updateCourseStatus = (req, res) => {
-  const { id } = req.params;
+  const { courseId } = req.params;
   const { status } = req.body;
 
+  // Validation du statut
+  const validStatuses = ['PENDING', 'APPROVED', 'REJECTED'];
+  if (!validStatuses.includes(status)) {
+    return res.status(400).json({ message: "Statut invalide" });
+  }
+
   connection.query(
-    "UPDATE Cours SET status=? WHERE idCours=?",
-    [status, id],
-    (err) => {
-      if (err) return res.status(500).json({ message: "Erreur serveur" });
-      res.json({ message: `Cours ${status.toLowerCase()}` });
+    "UPDATE Cours SET status = ? WHERE idCours = ?",
+    [status, courseId],
+    (err, result) => {
+      if (err) {
+        console.error('Erreur SQL:', err);
+        return res.status(500).json({ message: "Erreur serveur" });
+      }
+      
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: "Cours non trouvé" });
+      }
+      
+      res.json({ message: `Cours ${status === 'approved' ? 'validé' : 'refusé'} avec succès` });
     }
   );
 };
@@ -131,7 +179,7 @@ exports.createBackup = async (req, res) => {
 
     // Insérer dans la table BackupHistory
     connection.query(
-      "INSERT INTO BackupHistory (type, taille, statut) VALUES (?, ?, ?)",
+      "INSERT INTO backuphistory (type, taille, statut) VALUES (?, ?, ?)",
       ["Manuelle", `${stats.size} bytes`, "Terminée"]
     );
 

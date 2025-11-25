@@ -162,7 +162,7 @@ export default function GestionEtudiants() {
               {filteredStudents.length > 0 ? (
                 filteredStudents.map((student) => (
                   <tr key={student.idEtudiant}>
-                    <td>{student.nom}</td>
+                    <td>{student.nomUtilisateur}</td>
                     <td>{student.prenom}</td>
                     <td>{student.email}</td>
                     <td>{student.telephone || 'Non renseigné'}</td>

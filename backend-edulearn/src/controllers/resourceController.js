@@ -55,21 +55,39 @@ exports.addResource = async (req, res) => {
       });
     }
 
-    // Vérifier qu'au moins un fichier OU une URL est fourni
-    if (!url && !req.file) {
-      return res.status(400).json({
-        success: false,
-        error: 'Vous devez fournir un fichier OU une URL'
-      });
-    }
-
     let filePath = null;
     
     // Gestion du fichier uploadé
     if (req.file) {
       filePath = "/uploads/" + req.file.filename;
       console.log(`📁 Fichier uploadé: ${req.file.filename}`);
+      console.log(`📁 Chemin complet: ${req.file.path}`);
+      console.log(`📁 Taille: ${req.file.size} bytes`);
     }
+
+    // Vérifier qu'au moins un fichier OU une URL est fourni
+    if (!url && !req.file) {
+      // Nettoyer le fichier uploadé si présent (normalement pas le cas ici)
+      if (req.file) {
+        fs.unlink(req.file.path, (unlinkErr) => {
+          if (unlinkErr) console.error('Erreur suppression fichier:', unlinkErr);
+        });
+      }
+      
+      return res.status(400).json({
+        success: false,
+        error: 'Vous devez fournir un fichier OU une URL'
+      });
+    }
+
+    // DEBUG: Vérifier ce qui est reçu
+    console.log('📦 Données reçues:', {
+      courseId,
+      type,
+      url,
+      hasFile: !!req.file,
+      fileName: req.file ? req.file.filename : 'Aucun'
+    });
 
     // Insertion dans la base de données
     const result = await new Promise((resolve, reject) => {
@@ -83,32 +101,42 @@ exports.addResource = async (req, res) => {
       );
     });
 
+    // Vérifier que le fichier existe physiquement
+    if (req.file) {
+      const fileExists = fs.existsSync(req.file.path);
+      console.log(`📁 Fichier existe sur disque: ${fileExists}`);
+      
+      if (!fileExists) {
+        console.error('❌ Fichier non trouvé sur le disque:', req.file.path);
+      }
+    }
+
     res.status(201).json({
       success: true,
       message: 'Ressource ajoutée avec succès',
       data: {
         id: result.insertId,
-        courseId,
         type,
-        url: url || null,
-        filePath
+        file : filePath,
+        fileName: ""
       }
     });
 
   } catch (error) {
-    console.error('Erreur addResource:', error);
+    console.error('❌ Erreur addResource:', error);
     
     // Nettoyer le fichier uploadé en cas d'erreur
-    if (req.file) {
-      const filePath = path.join('uploads', req.file.filename);
-      fs.unlink(filePath, (unlinkErr) => {
+    if (req.file && req.file.path) {
+      fs.unlink(req.file.path, (unlinkErr) => {
         if (unlinkErr) console.error('Erreur suppression fichier:', unlinkErr);
+        else console.log('🧹 Fichier nettoyé après erreur');
       });
     }
 
     res.status(500).json({
       success: false,
-      error: 'Erreur lors de l\'ajout de la ressource'
+      error: 'Erreur lors de l\'ajout de la ressource',
+      details: error.message
     });
   }
 };

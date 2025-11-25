@@ -13,6 +13,8 @@ import {
   FaFilePdf,
   FaVideo,
   FaImage,
+  FaFile,
+  FaDownload,
 } from "react-icons/fa";
 import { courseService } from '../../services/courseService';
 import { resourceService } from '../../services/resourceService';
@@ -24,25 +26,25 @@ export default function Cours() {
   const [notification, setNotification] = useState({ show: false, type: "", message: "" });
   const [courses, setCourses] = useState([]);
   const [resources, setResources] = useState({});
-  const [pendingResources, setPendingResources] = useState([]);
 
   const [activeTab, setActiveTab] = useState("listeCours");
   const [courseSearch, setCourseSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [newCourse, setNewCourse] = useState({
-    id: null,
+    idCours: null,
     titre: "",
     description: "",
     content: "",
     DateCours: "",
-    file: null,
-    fileName: "",
   });
 
   const [newResource, setNewResource] = useState({
     type: "pdf",
-    url: ""
+    file: null,
+    fileName: ""
   });
+
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   useEffect(() => {
     if (user && user.idUtilisateur) {
@@ -54,7 +56,30 @@ export default function Cours() {
     try {
       setLoading(true);
       const coursesData = await courseService.getCoursByEnseignant(user.idUtilisateur);
-      setCourses(coursesData);
+      
+      // Transformer les données pour correspondre au format attendu
+      const transformedCourses = coursesData.map(course => ({
+        idCours: course.idCours,
+        titre: course.titre,
+        description: course.description,
+        content: course.content || "",
+        DateCours: course.DateCours,
+        nomClasse: course.nomClasse || 'Non assigné',
+        nomUtilisateur: course.nomUtilisateur,
+        resources: course.resources || [] // Les ressources sont déjà incluses depuis le backend
+      }));
+      
+      setCourses(transformedCourses);
+      
+      // Mettre à jour l'état des ressources
+      const resourcesState = {};
+      transformedCourses.forEach(course => {
+        if (course.resources && course.resources.length > 0) {
+          resourcesState[course.idCours] = course.resources;
+        }
+      });
+      setResources(resourcesState);
+      
     } catch (error) {
       console.error('Erreur fetchCourses:', error);
       showNotification("error", "Erreur lors du chargement des cours");
@@ -63,13 +88,18 @@ export default function Cours() {
     }
   };
 
-  const fetchResources = async (courseId) => {
+  const fetchResourcesForCourse = async (courseId) => {
     try {
       const resourcesData = await resourceService.getResourcesByCourse(courseId);
-      setResources(prev => ({ ...prev, [courseId]: resourcesData }));
+      setResources(prev => ({ 
+        ...prev, 
+        [courseId]: resourcesData 
+      }));
+      return resourcesData;
     } catch (error) {
-      console.error('Erreur fetchResources:', error);
+      console.error('Erreur fetchResourcesForCourse:', error);
       showNotification("error", "Erreur lors du chargement des ressources");
+      return [];
     }
   };
 
@@ -79,60 +109,98 @@ export default function Cours() {
   };
 
   const handleEditCourse = async (course) => { 
-    setNewCourse(course); 
+    setNewCourse({
+      idCours: course.idCours,
+      titre: course.titre,
+      description: course.description,
+      content: course.content,
+      DateCours: course.DateCours
+    }); 
     setActiveTab("modifierCours"); 
-    await fetchResources(course.id);
-  };
-
-  const handleAddPendingResource = () => {
-    if (!newResource.url.trim()) {
-      showNotification("error", "Veuillez saisir l'URL de la ressource");
-      return;
+    
+    // Charger les ressources si elles ne sont pas déjà chargées
+    if (!resources[course.idCours]) {
+      await fetchResourcesForCourse(course.idCours);
     }
-    const resource = {
-      id: Date.now(),
-      type: newResource.type,
-      url: newResource.url
-    };
-    setPendingResources([...pendingResources, resource]);
-    setNewResource({ type: "pdf", url: "" });
-    showNotification("success", "Ressource ajoutée à la liste !");
   };
 
-  const handleRemovePendingResource = (resourceId) => {
-    setPendingResources(pendingResources.filter(r => r.id !== resourceId));
-    showNotification("success", "Ressource retirée de la liste !");
-  };
-
-  const handleAddResource = async (courseId) => {
-    if (!newResource.url.trim()) {
-      showNotification("error", "Veuillez saisir l'URL de la ressource");
-      return;
-    }
-    try {
-      await resourceService.addResource({
-        courseId: courseId,
-        type: newResource.type,
-        url: newResource.url
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setNewResource({
+        ...newResource,
+        file: file,
+        fileName: file.name
       });
-      showNotification("success", "Ressource ajoutée avec succès !");
-      setNewResource({ type: "pdf", url: "" });
-      await fetchResources(courseId);
-    } catch (error) {
-      console.error(error);
-      showNotification("error", error.message);
     }
   };
+
+ const handleAddResource = async (courseId) => {
+  if (!newResource.file) {
+    showNotification("error", "Veuillez sélectionner un fichier");
+    return;
+  }
+
+  try {
+    setUploadProgress(0);
+
+    const formData = new FormData();
+    formData.append('file', newResource.file);
+    formData.append('courseId', courseId);
+    formData.append('type', newResource.type);
+
+    // Upload
+    const uploadedResource = await resourceService.addResource(formData);
+    // uploadedResource doit contenir la ressource ajoutée renvoyée par le backend
+    
+    console.log(uploadedResource.data)
+    showNotification("success", "Ressource ajoutée avec succès !");
+
+    // Mettre à jour le state local des ressources de façon incrémentale
+    setResources(prev => ({
+      ...prev,
+      [courseId]: prev[courseId] ? [...prev[courseId], uploadedResource.data] : [uploadedResource.data]
+    }));
+
+    console.log(resources)
+    setNewResource({ type: "pdf", file: null, fileName: "" });
+    setUploadProgress(0);
+
+    // Réinitialiser l'input file
+    const fileInput = document.querySelector('input[type="file"]');
+    if (fileInput) fileInput.value = '';
+
+  } catch (error) {
+    console.error('Erreur upload:', error);
+    showNotification("error", error.message || "Erreur lors de l'upload du fichier");
+  }
+};
+
 
   const handleDeleteResource = async (resourceId, courseId) => {
     if (!window.confirm("Supprimer cette ressource ?")) return;
     try {
       await resourceService.deleteResource(resourceId);
       showNotification("success", "Ressource supprimée avec succès !");
-      await fetchResources(courseId);
+      
+      // Mettre à jour l'état local
+      setResources(prev => ({
+        ...prev,
+        [courseId]: prev[courseId].filter(resource => resource.id !== resourceId)
+      }));
     } catch (error) {
       console.error(error);
       showNotification("error", error.message);
+    }
+  };
+
+  const handleDownloadResource = (resource) => {
+    if (resource.filePath) {
+      // Construire l'URL de téléchargement
+      const downloadUrl = `http://localhost:5000${resource.filePath}`;
+      window.open(downloadUrl, '_blank');
+    } else if (resource.url) {
+      window.open(resource.url, '_blank');
     }
   };
 
@@ -142,32 +210,24 @@ export default function Cours() {
       showNotification("error", "Veuillez remplir tous les champs obligatoires !");
       return;
     }
+
     try {
       const courseData = {
         titre: newCourse.titre,
         description: newCourse.description,
+        content: newCourse.content,
         DateCours: newCourse.DateCours,
         idUtilisateur: user.idUtilisateur
       };
-      const createdCourse = await courseService.createCourse(courseData);
-      const courseId = createdCourse.idCours || createdCourse.insertId;
-
-      if (pendingResources.length > 0) {
-        const resourcePromises = pendingResources.map(resource =>
-          resourceService.addResource({
-            courseId: courseId,
-            type: resource.type,
-            url: resource.url
-          })
-        );
-        await Promise.all(resourcePromises);
-      }
+      
+      await courseService.createCourse(courseData);
       await fetchCourses();
-      showNotification("success", `Cours ajouté avec succès ! ${pendingResources.length > 0 ? `Et ${pendingResources.length} ressource(s) ajoutée(s).` : ''}`);
+      
+      showNotification("success", "Cours ajouté avec succès !");
       resetForm();
       setActiveTab("listeCours");
     } catch (error) {
-      console.error("Erreur:", error.message);
+      console.error("Erreur:", error);
       showNotification("error", error.message || "Erreur réseau ou serveur !");
     }
   };
@@ -182,44 +242,48 @@ export default function Cours() {
       const updatedData = {
         titre: newCourse.titre,
         description: newCourse.description,
-        DateCours: newCourse.DateCours,
-        idUtilisateur: user.idUtilisateur
+        content: newCourse.content,
+        DateCours: newCourse.DateCours
       };
-      await courseService.updateCourse(newCourse.id, updatedData);
+      await courseService.updateCourse(newCourse.idCours, updatedData);
       await fetchCourses();
       showNotification("success", "Cours modifié avec succès !");
       resetForm();
       setActiveTab("listeCours");
     } catch (error) {
-      console.error("Erreur:", error.message);
+      console.error("Erreur:", error);
       showNotification("error", error.message || "Erreur réseau ou serveur !");
     }
   };
 
-  const handleDeleteCourse = async (id, titre) => {
+  const handleDeleteCourse = async (idCours, titre) => {
     if (!window.confirm(`Supprimer le cours "${titre}" ?`)) return;
     try {
-      await courseService.deleteCourse(id);
-      setCourses(courses.filter((c) => c.id !== id));
+      await courseService.deleteCourse(idCours);
+      // Mettre à jour l'état local
+      setCourses(courses.filter((c) => c.idCours !== idCours));
+      setResources(prev => {
+        const newResources = { ...prev };
+        delete newResources[idCours];
+        return newResources;
+      });
       showNotification("success", "Cours supprimé avec succès !");
     } catch (error) {
-      console.error("Erreur:", error.message);
+      console.error("Erreur:", error);
       showNotification("error", error.message || "Erreur réseau ou serveur !");
     }
   };
 
   const resetForm = () => {
     setNewCourse({
-      id: null,
+      idCours: null,
       titre: "",
       description: "",
       content: "",
       DateCours: "",
-      file: null,
-      fileName: "",
     });
-    setNewResource({ type: "pdf", url: "" });
-    setPendingResources([]);
+    setNewResource({ type: "pdf", file: null, fileName: "" });
+    setUploadProgress(0);
   };
 
   const getResourceIcon = (type) => {
@@ -227,8 +291,15 @@ export default function Cours() {
       case 'pdf': return <FaFilePdf className="text-danger" />;
       case 'video': return <FaVideo className="text-primary" />;
       case 'image': return <FaImage className="text-success" />;
-      default: return <FaLink className="text-warning" />;
+      default: return <FaFile className="text-warning" />;
     }
+  };
+
+  const getResourceDisplayName = (resource) => {
+    if (resource.filePath) {
+      return resource.filePath.split('/').pop() || 'Fichier';
+    }
+    return resource.url || 'Ressource';
   };
 
   const filteredCourses = courses.filter(
@@ -236,7 +307,7 @@ export default function Cours() {
       course.titre && course.titre.toLowerCase().includes(courseSearch.toLowerCase())
   );
 
-  if (loading) return <p>Chargement des cours...</p>;
+  if (loading) return <div className="text-center p-4">Chargement des cours...</div>;
 
   return (
     <div className="cours-container p-4">
@@ -301,21 +372,33 @@ export default function Cours() {
               </thead>
               <tbody>
                 {filteredCourses.length > 0 ? (
-                  filteredCourses.map((c) => (
-                    <tr key={c.idCours || c.id}>
-                      <td>{c.titre}</td>
-                      <td>{c.description}</td>
-                      <td>{c.DateCours ? new Date(c.DateCours).toLocaleDateString('fr-FR') : ''}</td>
+                  filteredCourses.map((course) => (
+                    <tr key={course.idCours}>
+                      <td>
+                        <strong>{course.titre}</strong>
+                        {course.content && (
+                          <small className="d-block text-muted mt-1">
+                            {course.content.substring(0, 100)}...
+                          </small>
+                        )}
+                      </td>
+                      <td>{course.description}</td>
+                      <td>{course.DateCours ? new Date(course.DateCours).toLocaleDateString('fr-FR') : ''}</td>
                       <td>
                         <span className="badge bg-secondary">
-                          {c.nomClasse || 'Non assigné'}
+                          {course.nomClasse}
                         </span>
                       </td>
                       <td>
-                        {resources[c.idCours || c.id] && resources[c.idCours || c.id].length > 0 ? (
-                          <span className="badge bg-primary">
-                            {resources[c.idCours || c.id].length} ressource(s)
-                          </span>
+                        {course.resources && course.resources.length > 0 ? (
+                          <div>
+                            <span className="badge bg-primary me-1">
+                              {course.resources.length} ressource(s)
+                            </span>
+                            <small className="text-muted d-block mt-1">
+                              {course.resources.map(r => r.type).join(', ')}
+                            </small>
+                          </div>
                         ) : (
                           <span className="text-muted">Aucune ressource</span>
                         )}
@@ -323,19 +406,16 @@ export default function Cours() {
                       <td>
                         <button 
                           className="btn btn-primary btn-sm me-2" 
-                          onClick={() => handleEditCourse({
-                            id: c.idCours || c.id,
-                            titre: c.titre,
-                            description: c.description,
-                            DateCours: c.DateCours
-                          })}
+                          onClick={() => handleEditCourse(course)}
+                          title="Modifier le cours"
                         >
                           <FaEdit />
                         </button>
                         <button
                           className="btn btn-sm"
                           style={{ backgroundColor: "#ff8800", color: "#fff" }}
-                          onClick={() => handleDeleteCourse(c.idCours || c.id, c.titre)}
+                          onClick={() => handleDeleteCourse(course.idCours, course.titre)}
+                          title="Supprimer le cours"
                         >
                           <FaTrash />
                         </button>
@@ -360,9 +440,11 @@ export default function Cours() {
 
       {(activeTab === "ajouterCours" || activeTab === "modifierCours") && (
         <div className="card-modern p-4 mt-4">
-          <h4>{activeTab === "modifierCours" ? "Modifier le cours" : "Créer un nouveau cours"}</h4>
+          <h4 className="mb-4">
+            {activeTab === "modifierCours" ? "Modifier le cours" : "Créer un nouveau cours"}
+          </h4>
           <form onSubmit={activeTab === "modifierCours" ? handleUpdateCourse : handleCourseSubmit}>
-            <div className="row mb-3 align-items-center">
+            <div className="row mb-3">
               <label className="col-sm-2 col-form-label">Titre *</label>
               <div className="col-sm-10">
                 <input
@@ -371,11 +453,12 @@ export default function Cours() {
                   value={newCourse.titre}
                   onChange={(e) => setNewCourse({ ...newCourse, titre: e.target.value })}
                   required
+                  placeholder="Titre du cours"
                 />
               </div>
             </div>
 
-            <div className="row mb-3 align-items-center">
+            <div className="row mb-3">
               <label className="col-sm-2 col-form-label">Description *</label>
               <div className="col-sm-10">
                 <textarea
@@ -384,24 +467,25 @@ export default function Cours() {
                   value={newCourse.description}
                   onChange={(e) => setNewCourse({ ...newCourse, description: e.target.value })}
                   required
-                ></textarea>
+                  placeholder="Description du cours"
+                />
               </div>
             </div>
 
-            <div className="row mb-3 align-items-center">
-              <label className="col-sm-2 col-form-label">Contenu *</label>
+            <div className="row mb-3">
+              <label className="col-sm-2 col-form-label">Contenu détaillé</label>
               <div className="col-sm-10">
                 <textarea
                   className="form-control"
-                  rows="4"
+                  rows="5"
                   value={newCourse.content}
                   onChange={(e) => setNewCourse({ ...newCourse, content: e.target.value })}
-                  required
-                ></textarea>
+                  placeholder="Contenu détaillé du cours (objectifs, plan, etc.)"
+                />
               </div>
             </div>
 
-            <div className="row mb-3 align-items-center">
+            <div className="row mb-3">
               <label className="col-sm-2 col-form-label">Date *</label>
               <div className="col-sm-10">
                 <input
@@ -414,100 +498,101 @@ export default function Cours() {
               </div>
             </div>
 
-            {/* Gestion des ressources */}
-            <div className="row mb-4">
-              <div className="col-12">
-                <div className="border rounded p-3 bg-light">
-                  <h6 className="mb-3">
-                    <FaLink className="me-2" />
-                    {activeTab === "ajouterCours" ? "Ajouter des ressources au cours" : "Gestion des ressources du cours"}
-                  </h6>
-                  <div className="row g-2 mb-3">
-                    <div className="col-md-3">
-                      <select
-                        className="form-control"
-                        value={newResource.type}
-                        onChange={(e) => setNewResource({ ...newResource, type: e.target.value })}
-                      >
-                        <option value="pdf">PDF</option>
-                        <option value="video">Vidéo</option>
-                        <option value="image">Image</option>
-                      </select>
-                    </div>
-                    <div className="col-md-6">
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="URL de la ressource..."
-                        value={newResource.url}
-                        onChange={(e) => setNewResource({ ...newResource, url: e.target.value })}
-                      />
-                    </div>
-                    <div className="col-md-3">
-                      <button
-                        type="button"
-                        className="btn btn-success w-100"
-                        onClick={activeTab === "ajouterCours" ? handleAddPendingResource : () => handleAddResource(newCourse.id)}
-                      >
-                        <FaPlus /> Ajouter
-                      </button>
-                    </div>
-                  </div>
-
-                  {activeTab === "ajouterCours" ? (
-                    pendingResources.length > 0 ? (
-                      <div className="mt-3">
-                        <small className="text-muted d-block mb-2">Ressources à ajouter :</small>
-                        {pendingResources.map((resource) => (
-                          <div key={resource.id} className="d-flex justify-content-between align-items-center border rounded p-2 mb-2 bg-white">
-                            <div className="d-flex align-items-center">
-                              {getResourceIcon(resource.type)}
-                              <span className="ms-2">
-                                <strong>{resource.type.toUpperCase()}:</strong> {resource.url}
-                              </span>
-                            </div>
-                            <button
-                              type="button"
-                              className="btn btn-danger btn-sm"
-                              onClick={() => handleRemovePendingResource(resource.id)}
-                            >
-                              <FaTrash />
-                            </button>
-                          </div>
-                        ))}
+            {/* Gestion des ressources - Uniquement pour la modification */}
+            {activeTab === "modifierCours" && (
+              <div className="row mb-4">
+                <div className="col-12">
+                  <div className="border rounded p-3 bg-light">
+                    <h6 className="mb-3">
+                      <FaLink className="me-2" />
+                      Gestion des ressources du cours
+                    </h6>
+                    
+                    {/* Ajout de nouvelle ressource */}
+                    <div className="row g-2 mb-3">
+                      <div className="col-md-3">
+                        <select
+                          className="form-control"
+                          value={newResource.type}
+                          onChange={(e) => setNewResource({ ...newResource, type: e.target.value })}
+                        >
+                          <option value="pdf">PDF</option>
+                          <option value="video">Vidéo</option>
+                          <option value="image">Image</option>
+                          <option value="document">Document</option>
+                        </select>
                       </div>
-                    ) : (
-                      <div className="text-center text-muted py-3">Aucune ressource ajoutée pour le moment</div>
-                    )
-                  ) : (
-                    resources[newCourse.id] && resources[newCourse.id].length > 0 ? (
+                      <div className="col-md-6">
+                        <input
+                          type="file"
+                          className="form-control"
+                          onChange={handleFileChange}
+                          accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.mp4,.avi,.mov"
+                        />
+                        {newResource.fileName && (
+                          <small className="text-muted">
+                            Fichier sélectionné: {newResource.fileName}
+                          </small>
+                        )}
+                      </div>
+                      <div className="col-md-3">
+                        <button
+                          type="button"
+                          className="btn btn-success w-100"
+                          onClick={() => handleAddResource(newCourse.idCours)}
+                        >
+                          <FaPlus /> Ajouter
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Liste des ressources existantes */}
+                    {resources[newCourse.idCours] && resources[newCourse.idCours].length > 0 ? (
                       <div className="mt-3">
                         <small className="text-muted d-block mb-2">Ressources existantes :</small>
-                        {resources[newCourse.id].map((resource) => (
+                        {resources[newCourse.idCours].map((resource) => (
                           <div key={resource.id} className="d-flex justify-content-between align-items-center border rounded p-2 mb-2 bg-white">
-                            <div className="d-flex align-items-center">
+                            <div className="d-flex align-items-center flex-grow-1">
                               {getResourceIcon(resource.type)}
-                              <span className="ms-2">
-                                <strong>{resource.type.toUpperCase()}:</strong> {resource.url}
-                              </span>
+                              <div className="ms-2 flex-grow-1">
+                                <div>
+                                  <strong>{resource.type.toUpperCase()}:</strong> {getResourceDisplayName(resource)}
+                                </div>
+                                {resource.filePath && (
+                                  <small className="text-muted">
+                                    {resource.filePath}
+                                  </small>
+                                )}
+                              </div>
+                              <div className="d-flex">
+                                <button
+                                  type="button"
+                                  className="btn btn-info btn-sm me-2"
+                                  onClick={() => handleDownloadResource(resource)}
+                                  title="Télécharger"
+                                >
+                                  <FaDownload />
+                                </button>
+                                <button
+                                  type="button"
+                                  className="btn btn-danger btn-sm"
+                                  onClick={() => handleDeleteResource(resource.id, newCourse.idCours)}
+                                  title="Supprimer"
+                                >
+                                  <FaTrash />
+                                </button>
+                              </div>
                             </div>
-                            <button
-                              type="button"
-                              className="btn btn-danger btn-sm"
-                              onClick={() => handleDeleteResource(resource.id, newCourse.id)}
-                            >
-                              <FaTrash />
-                            </button>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <div className="text-center text-muted py-3">Aucune ressource ajoutée pour ce cours</div>
-                    )
-                  )}
+                      <div className="text-center text-muted py-3">Aucune ressource ajoutée à ce cours</div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
             <div className="d-flex justify-content-between mt-4">
               <button
@@ -516,10 +601,10 @@ export default function Cours() {
                 style={{ backgroundColor: "#ff8800", color: "#fff" }}
                 onClick={() => { resetForm(); setActiveTab("listeCours"); }}
               >
-                ← Retour
+                ← Retour à la liste
               </button>
               <button type="submit" className="btn btn-primary">
-                {activeTab === "modifierCours" ? "Mettre à jour" : "Publier le cours"}
+                {activeTab === "modifierCours" ? "Mettre à jour le cours" : "Créer le cours"}
               </button>
             </div>
           </form>

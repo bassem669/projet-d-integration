@@ -23,6 +23,7 @@ exports.getAllCours = (req, res) => {
 exports.getCoursByEnseignant = (req, res) => {
   const { idUtilisateur } = req.params;
 
+  // 1. Récupérer tous les cours de l'enseignant
   connection.query(
     `SELECT c.*, u.nom AS nomUtilisateur, cl.nomClasse
      FROM Cours c
@@ -30,16 +31,40 @@ exports.getCoursByEnseignant = (req, res) => {
      LEFT JOIN Classe cl ON c.idClasse = cl.idClasse
      WHERE c.idUtilisateur = ?`,
     [idUtilisateur],
-    (err, results) => {
+    (err, courses) => {
       if (err) {
         console.error("Erreur lors de la récupération des cours :", err);
         return res.status(500).json({ message: "Erreur serveur" });
       }
 
-      res.json(results);
+      if (courses.length === 0) return res.json([]); // Pas de cours
+
+      // 2. Récupérer toutes les ressources pour ces cours
+      const courseIds = courses.map(c => c.idCours);
+      connection.query(
+        `SELECT id, courseId, type, url, filePath
+         FROM Resources
+         WHERE courseId IN (?)`,
+        [courseIds],
+        (err2, resources) => {
+          if (err2) {
+            console.error("Erreur lors de la récupération des ressources :", err2);
+            return res.status(500).json({ message: "Erreur serveur" });
+          }
+
+          // 3. Ajouter les ressources à chaque cours
+          const coursesWithResources = courses.map(course => {
+            course.resources = resources.filter(r => r.courseId === course.idCours);
+            return course;
+          });
+
+          res.json(coursesWithResources);
+        }
+      );
     }
   );
 };
+
 
 // routes/etudiants.js ou routes/enseignants.js
 
@@ -179,8 +204,8 @@ exports.updateCours = (req, res) => {
 
 
 exports.deleteCours = (req, res) => {
-  const { courseId } = req.params;
-  connection.query('DELETE FROM Cours WHERE idCours = ?', [courseId], (err) => {
+  const { id } = req.params;
+  connection.query('DELETE FROM Cours WHERE idCours = ?', [id], (err) => {
     if (err) return res.status(500).json({ message: 'Erreur lors de la suppression' });
     res.json({ message: 'Cours supprimé avec succès' });
   });

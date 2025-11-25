@@ -14,7 +14,7 @@ router.get('/:id/details', coursController.getCoursDetails);
 router.post(
   '/', 
   auth, 
-  roleMiddleware(['enseignant', 'admin']), 
+  roleMiddleware(['enseignant']), 
   coursController.createCours
 );
 
@@ -24,7 +24,7 @@ router.get('/enseignant/:idEnseignant/etudiant', coursController.getEtudiantsByE
 router.put(
   '/:id', 
   auth, 
-  roleMiddleware(['enseignant', 'admin']), 
+  roleMiddleware(['enseignant']), 
   coursController.updateCours
 );
 
@@ -41,35 +41,6 @@ router.get(
   roleMiddleware(['admin', 'enseignant', 'etudiant']), 
   coursController.downloadCours
 );
-
-exports.getAdminLogs = (req, res) => {
-  connection.query('SELECT * FROM AdminLogs ORDER BY date_action DESC LIMIT 50', (err, results) => {
-    if(err) return res.status(500).json({ message: 'Erreur serveur' });
-    res.json(results);
-  });
-};
-
-exports.createBackup = (req, res) => {
-  // Simuler une sauvegarde
-  res.json({ message: 'Sauvegarde lancée', date: new Date() });
-};
-
-exports.getBackupsHistory = (req, res) => {
-  // Historique fictif
-  const backups = [
-    { date: '2025-11-18', type: 'Automatique', taille: '2.4Go', statut: 'Terminée' },
-    { date: '2025-11-17', type: 'Automatique', taille: '2.3Go', statut: 'Terminée' }
-  ];
-  res.json(backups);
-};
-
-exports.getSecurityStatus = (req, res) => {
-  res.json({
-    https: true,
-    rateLimit: '100 req/min',
-    attemptsBlocked24h: 3
-  });
-};
 
 
 module.exports = router;

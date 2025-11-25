@@ -92,9 +92,9 @@ const getAdminDashboardStats = async (req, res) => {
         const [courseStats] = await connection.promise().query(`
             SELECT 
                 COUNT(*) as totalCours,
-                SUM(CASE WHEN statut = 'en_attente' THEN 1 ELSE 0 END) as enAttente,
-                SUM(CASE WHEN statut = 'valide' THEN 1 ELSE 0 END) as valides,
-                SUM(CASE WHEN statut = 'refuse' THEN 1 ELSE 0 END) as refuses
+                SUM(CASE WHEN status = 'PENDING' THEN 1 ELSE 0 END) as enAttente,
+                SUM(CASE WHEN status = 'APPROVED' THEN 1 ELSE 0 END) as valides,
+                SUM(CASE WHEN status = 'REJECTED' THEN 1 ELSE 0 END) as refuses
             FROM Cours
         `);
 

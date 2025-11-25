@@ -7,7 +7,7 @@ export const etudiantService = {
   // Récupérer les étudiants des cours d'un enseignant
   getEtudiantsByEnseignant: async (idEnseignant) => {
     try {
-      const response = await axios.get(`${API_URL}/cours/enseignant/${idEnseignant}`);
+      const response = await axios.get(`${API_URL}/cours/enseignant/${idEnseignant}/etudiant`);
       return response.data;
     } catch (error) {
       throw error.response?.data || error;

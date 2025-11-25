@@ -6,15 +6,40 @@ import { LayoutDashboard, Users, BookOpen, Shield, FileText, Download, LogOut, B
 import logo from "../../assets/logo_edu.png";
 import { useNavigate } from 'react-router-dom';
 
-
 const AdminLayout = () => {
     const navigate = useNavigate();
+    
+    // Récupérer l'utilisateur depuis le localStorage
+    const userData = JSON.parse(localStorage.getItem("user") || "{}");
+    
+    // Extraire les informations de l'utilisateur
+    const userName = userData.nom || userData.prenom || userData.email || "Administrateur";
+    const userEmail = userData.email || "admin@edulearn.com";
+    const userRole = userData.role || "Admin";
+    const userInitials = getUserInitials(userData);
+
+    // Fonction pour générer les initiales
+    function getUserInitials(user) {
+        if (user.nom && user.prenom) {
+            return (user.prenom.charAt(0) + user.nom.charAt(0)).toUpperCase();
+        } else if (user.nom) {
+            return user.nom.charAt(0).toUpperCase();
+        } else if (user.prenom) {
+            return user.prenom.charAt(0).toUpperCase();
+        } else if (user.email) {
+            return user.email.charAt(0).toUpperCase();
+        }
+        return "AD";
+    }
+
     const handleLogout = () => {
-        // Supprime éventuellement les infos de l'utilisateur
+        // Supprime les informations de l'utilisateur
         localStorage.removeItem("user");
+        localStorage.removeItem("token");
         // Redirection vers la page de connexion
         navigate("/login");
     };
+
     return (
         <div className="admin-dashboard-container">
             {/* TOP NAV */}
@@ -27,20 +52,24 @@ const AdminLayout = () => {
                     {/* Profil admin */}
                     <div className="admin-profile-wrapper">
                         <div className="admin-profile-info">
-                            <div className="admin-name">Administrateur</div>
-                            <div className="admin-role">Rôle : Admin</div>
+                            <div className="admin-name">{userName}</div>
+                            <div className="admin-email">{userEmail}</div>
+                            <div className="admin-role">Rôle : {userRole}</div>
                         </div>
-                        <div className="admin-profile-pic">AD</div>
+                        <div className="admin-profile-pic">{userInitials}</div>
                     </div>
-
-
                 </div>
             </header>
 
             <div className="admin-layout">
                 {/* SIDEBAR */}
                 <aside className="admin-sidebar">
-                    <h2>Admin Panel</h2>
+                    <div className="sidebar-header">
+                        <h2>Admin Panel</h2>
+                        <div className="user-welcome">
+                            Bonjour, <strong>{userName.split(' ')[0]}</strong>
+                        </div>
+                    </div>
                     <ul className="admin-sidebar-menu">
                         <li>
                             <NavLink to="/admin" className={({ isActive }) => `admin-sidebar-link ${isActive ? 'active' : ''}`} end>

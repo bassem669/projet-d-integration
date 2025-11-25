@@ -1,4 +1,5 @@
 const express = require('express');
+const audit = require('../middleware/auditMiddleware');
 const router = express.Router();
 const { register, 
         login, 
@@ -10,13 +11,14 @@ const { register,
 
 } = require('../controllers/authController');
 
+const { resetLimiter } = require('../middleware/rateLimit');
 const authController = require('../controllers/authController');
 
 router.post('/register', register);
-router.post('/login', login);
-router.post('/forgot-password', réinitialisationMotDePass);
-router.post('/verify-code', verifierCode);
-router.post('/reset-password', resetMotDePass);
+router.post('/login', audit('connexion'), resetLimiter, login);
+router.post('/forgot-password', resetLimiter, réinitialisationMotDePass);
+router.post('/verify-code', resetLimiter, verifierCode);
+router.post('/reset-password', resetLimiter, resetMotDePass);
 router.post('/logout', logout);
 router.get('/enseignants', getAllEnseignants);
 

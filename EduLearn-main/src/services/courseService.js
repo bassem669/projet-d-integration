@@ -35,7 +35,7 @@ export const courseService = {
         date: course.DateCours ? new Date(course.DateCours).toISOString().split('T')[0] : '',
         teacher: course.nomUtilisateur || 'Non assigné',
         classe: course.nomClasse || 'Non spécifiée',
-        support: course.support,
+        resources: course.resources,
         idUtilisateur: course.idUtilisateur
       }));
     } catch (error) {
@@ -102,9 +102,9 @@ export const courseService = {
   },
 
   // Supprimer un cours
-  async deleteCourse(courseId) {
+  async deleteCourse(id) {
     try {
-      const response = await fetch(`${API_ENDPOINTS.COURSES}/${courseId}`, {
+      const response = await fetch(`${API_ENDPOINTS.COURSES}/${id}`, {
         method: 'DELETE',
         headers: getAuthHeaders()
       });
