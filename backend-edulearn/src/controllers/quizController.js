@@ -183,7 +183,7 @@ exports.getQuizResults = (req, res) => {
   const studentId = req.user.id;
 
   connection.query(
-    `SELECT rq.*, q.titre as titreQuiz, c.titre as nomCours
+    `SELECT rq.*, q.idQuiz, q.titre as titreQuiz, c.titre as nomCours
      FROM ResultatQuiz rq
      JOIN Quiz q ON rq.idQuiz = q.idQuiz
      JOIN Cours c ON q.idCours = c.idCours

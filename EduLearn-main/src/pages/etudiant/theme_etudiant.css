@@ -13,6 +13,56 @@
   --white: #FFFFFF;
 }
 
+/* Styles pour le modal de quiz */
+.quiz-modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  z-index: 1040;
+}
+
+.quiz-modal {
+  z-index: 1050;
+}
+
+.quiz-modal .question-container {
+  min-height: 300px;
+}
+
+.quiz-modal .answers-container .form-check {
+  transition: all 0.2s;
+  border: 1px solid #dee2e6 !important;
+  background-color: white !important;
+}
+
+.quiz-modal .answers-container .form-check:hover {
+  background-color: #f8f9fa !important;
+  transform: translateY(-1px);
+  border-color: #007bff !important;
+}
+
+.quiz-modal .quick-navigation .btn {
+  min-width: 40px;
+}
+
+.quiz-modal .modal-content {
+  border: none;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  background-color: white !important;
+}
+
+.quiz-modal .modal-header {
+  border-bottom: 2px solid #dee2e6;
+  background-color: #007bff !important;
+}
+
+.quiz-modal .modal-body {
+  background-color: white !important;
+}
+
+.quiz-modal .modal-footer {
+  border-top: 2px solid #dee2e6;
+  background-color: #f8f9fa !important;
+}
+
 /* Ajoutez ceci à theme_etudiant.css */
 .resource-card {
   transition: transform 0.2s ease, box-shadow 0.2s ease;

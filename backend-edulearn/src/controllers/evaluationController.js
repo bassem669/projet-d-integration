@@ -1,4 +1,8 @@
 // ==================== ÉVALUATIONS PDF - FONCTIONS ÉTUDIANT ====================
+const connection = require('../config/db');
+const path = require('path');
+const fs = require("fs");
+
 
 // Obtenir toutes les évaluations PDF disponibles pour un étudiant
 exports.getEvaluationsPDFForStudent = (req, res) => {
@@ -262,7 +266,7 @@ exports.updateEvaluationPDF = (req, res) => {
 
       connection.query(
         `UPDATE EvaluationPDF 
-         SET ${updateFields.join(', ')}, updated_at = NOW()
+         SET ${updateFields.join(', ')}
          WHERE idEvaluation = ?`,
         updateValues,
         (err, result) => {

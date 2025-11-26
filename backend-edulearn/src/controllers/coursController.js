@@ -10,7 +10,7 @@ exports.getAllCours = (req, res) => {
      FROM Cours c
      LEFT JOIN Utilisateur u ON c.idUtilisateur = u.idUtilisateur
      LEFT JOIN Classe cl ON c.idClasse = cl.idClasse
-     WHERE c.statut = 'APPROVED'`,
+     WHERE c.status = 'APPROVED'`,
     (err, results) => {
       if (err) {
         console.error('Erreur lors de la récupération des cours :', err);

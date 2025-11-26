@@ -51,8 +51,9 @@ router.put(
   auth,
   role(['admin']),
   audit('Changement statut cours'),
-  adminController.updateCourseStatus
+  adminController.updateCourseStatus  // <-- sans ()
 );
+
 
 // ===================== LOGS =====================
 router.get(

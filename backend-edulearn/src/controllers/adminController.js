@@ -3,6 +3,7 @@ const fs = require('fs');
 const { exec } = require('child_process');
 const path = require('path');
 const mysqldump = require('mysqldump');
+const { sendSecurityAlert } = require('../middleware/emailService');
 
 // ===================== UTILISATEURS =====================
 exports.getAllUsers = (req, res) => {
@@ -111,7 +112,9 @@ exports.getCourses = (req, res) => {
   });
 };
 
-exports.updateCourseStatus = (req, res) => {
+
+
+exports.updateCourseStatus = async (req, res) => {
   const { courseId } = req.params;
   const { status } = req.body;
 
@@ -121,23 +124,51 @@ exports.updateCourseStatus = (req, res) => {
     return res.status(400).json({ message: "Statut invalide" });
   }
 
-  connection.query(
-    "UPDATE Cours SET status = ? WHERE idCours = ?",
-    [status, courseId],
-    (err, result) => {
-      if (err) {
-        console.error('Erreur SQL:', err);
-        return res.status(500).json({ message: "Erreur serveur" });
-      }
-      
-      if (result.affectedRows === 0) {
-        return res.status(404).json({ message: "Cours non trouvé" });
-      }
-      
-      res.json({ message: `Cours ${status === 'approved' ? 'validé' : 'refusé'} avec succès` });
+  try {
+    // 1️⃣ Récupérer le cours et l'auteur
+    const [courses] = await connection.promise().query(
+      `SELECT C.titre, U.email, U.nom 
+       FROM Cours C 
+       JOIN Utilisateur U ON C.idUtilisateur = U.idUtilisateur 
+       WHERE C.idCours = ?`,
+      [courseId]
+    );
+
+    if (courses.length === 0) return res.status(404).json({ message: "Cours non trouvé" });
+
+    const course = courses[0];
+
+    // 2️⃣ Mettre à jour le statut du cours
+    await connection.promise().query(
+      "UPDATE Cours SET status = ? WHERE idCours = ?",
+      [status, courseId]
+    );
+
+    // 3️⃣ Envoyer l'email à l'auteur
+    const statusMessage = status === 'APPROVED' ? 'validé' : status === 'REJECTED' ? 'refusé' : 'en attente';
+    const subject = `Mise à jour du statut de votre cours "${course.titre}"`;
+    const message = `
+      Bonjour ${course.nom},<br><br>
+      Le statut de votre cours "<strong>${course.titre}</strong>" a été <strong>${statusMessage}</strong>.<br><br>
+      Cordialement,<br>
+      L'équipe EduLearn
+    `;
+
+    try {
+      await sendSecurityAlert(course.email, subject, message);
+    } catch (mailErr) {
+      console.error('Erreur envoi email:', mailErr);
     }
-  );
+
+    // 4️⃣ Répondre au frontend
+    res.json({ message: `Cours ${statusMessage} avec succès` });
+
+  } catch (err) {
+    console.error('Erreur updateCourseStatus:', err);
+    res.status(500).json({ message: "Erreur serveur" });
+  }
 };
+
 
 // ===================== LOGS =====================
 exports.getAdminLogs = (req, res) => {

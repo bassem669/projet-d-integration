@@ -306,6 +306,158 @@ body {
   transition: opacity 0.2s;
 }
 
+/* Styles pour les détails du quiz */
+.info-card {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  height: 100%;
+  border-left: 4px solid #007bff;
+}
+
+.info-title {
+  color: #495057;
+  font-weight: 600;
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+}
+
+.info-content p {
+  margin-bottom: 10px;
+  display: flex;
+  align-items: flex-start;
+}
+
+/* Cartes de statistiques */
+.stat-card {
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border: 1px solid #e9ecef;
+  transition: transform 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.stat-icon {
+  font-size: 2rem;
+  color: #007bff;
+  margin-bottom: 10px;
+}
+
+.stat-title {
+  color: #6c757d;
+  font-size: 0.9rem;
+  margin-bottom: 5px;
+}
+
+.stat-value {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #495057;
+  margin: 0;
+}
+
+/* Cartes de questions */
+.question-card {
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.question-card .card-header {
+  background: #f8f9fa !important;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.question-enonce {
+  font-size: 1.1rem;
+  color: #495057;
+  margin-bottom: 0;
+  line-height: 1.5;
+}
+
+/* Réponses */
+.answers-section {
+  background: #f8f9fa;
+  border-radius: 6px;
+  padding: 15px;
+}
+
+.answers-title {
+  color: #495057;
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+
+.answer-item {
+  padding: 10px 15px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+  background: white;
+}
+
+.answer-item.correct-answer {
+  border-left: 4px solid #28a745;
+  background: #f8fff9;
+}
+
+.answer-item.incorrect-answer {
+  border-left: 4px solid #dc3545;
+}
+
+.answer-number {
+  font-weight: bold;
+  color: #6c757d;
+  min-width: 20px;
+}
+
+.answer-text {
+  color: #495057;
+}
+
+.correct-badge {
+  background: #28a745;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+}
+
+/* Tableau des résultats */
+.results-section {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  border: 1px solid #e9ecef;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .info-card {
+    margin-bottom: 15px;
+  }
+  
+  .stat-card {
+    margin-bottom: 15px;
+  }
+  
+  .question-enonce {
+    font-size: 1rem;
+  }
+  
+  .answer-item {
+    padding: 8px 12px;
+  }
+}
+
 .notification-close:hover {
   opacity: 1;
 }
